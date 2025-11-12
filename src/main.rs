@@ -67,6 +67,13 @@ const MODULE_REGISTRY: &[ModuleInfo] = &[
         description: "生态系统、工具和最佳实践",
         run_function: rust_learn::ecosystem::run_ecosystem_examples,
     },
+    ModuleInfo {
+        name: "popular_libraries",
+        description: "热门Rust库使用案例(Serde、Clap、Reqwest等)",
+        run_function: || {
+            println!("运行热门库演示，使用命令: cargo run --popular_libraries serialize");
+        },
+    },
 ];
 
 /// 现代化错误处理类型
