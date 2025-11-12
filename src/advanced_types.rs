@@ -186,7 +186,9 @@ pub fn modern_trait_system() {
         type Style;
         
         fn draw(&self) -> String;
+        #[allow(dead_code)]
         fn get_color(&self) -> Self::Color;
+        #[allow(dead_code)]
         fn get_style(&self) -> Self::Style;
     }
     
@@ -395,6 +397,547 @@ pub fn modern_newtype_pattern() {
     process_user(user_id, session_id);
 }
 
+/// 演示工厂模式
+pub fn factory_pattern() {
+    println!("🏭 工厂模式：");
+    
+    // 产品特征
+    trait Product {
+        fn operation(&self) -> String;
+    }
+    
+    // 具体产品
+    #[derive(Debug)]
+    struct ConcreteProductA;
+    
+    impl Product for ConcreteProductA {
+        fn operation(&self) -> String {
+            "产品A的操作".to_string()
+        }
+    }
+    
+    #[derive(Debug)]
+    struct ConcreteProductB;
+    
+    impl Product for ConcreteProductB {
+        fn operation(&self) -> String {
+            "产品B的操作".to_string()
+        }
+    }
+    
+    // 工厂特征
+    trait ProductFactory {
+        type Product: Product;
+        
+        fn create_product(&self) -> Self::Product;
+    }
+    
+    // 具体工厂
+    struct ConcreteFactoryA;
+    
+    impl ProductFactory for ConcreteFactoryA {
+        type Product = ConcreteProductA;
+        
+        fn create_product(&self) -> Self::Product {
+            ConcreteProductA
+        }
+    }
+    
+    struct ConcreteFactoryB;
+    
+    impl ProductFactory for ConcreteFactoryB {
+        type Product = ConcreteProductB;
+        
+        fn create_product(&self) -> Self::Product {
+            ConcreteProductB
+        }
+    }
+    
+    // 客户端代码
+    let factories: Vec<Box<dyn ProductFactory<Product = ConcreteProductA>>> = vec![
+        Box::new(ConcreteFactoryA) as Box<dyn ProductFactory<Product = ConcreteProductA>>,
+        // 对于第二个工厂，我们需要使用不同的方法
+    ];
+    
+    // 分别调用每个工厂
+    let factory_a = Box::new(ConcreteFactoryA) as Box<dyn ProductFactory<Product = ConcreteProductA>>;
+    let factory_b = Box::new(ConcreteFactoryB) as Box<dyn ProductFactory<Product = ConcreteProductB>>;
+    
+    // 测试工厂A
+    let product_a = factory_a.create_product();
+    println!("创建产品: {}", product_a.operation());
+    
+    // 测试工厂B
+    let product_b = factory_b.create_product();
+    println!("创建产品: {}", product_b.operation());
+    
+    // 使用向量分别存储不同类型的工厂
+    let _factories_a = vec![
+        Box::new(ConcreteFactoryA) as Box<dyn ProductFactory<Product = ConcreteProductA>>,
+    ];
+    
+    let _factories_b = vec![
+        Box::new(ConcreteFactoryB) as Box<dyn ProductFactory<Product = ConcreteProductB>>,
+    ];
+    
+    for factory in factories {
+        let product = factory.create_product();
+        println!("创建产品: {}", product.operation());
+    }
+}
+
+/// 演示策略模式
+pub fn strategy_pattern() {
+    println!("🎯 策略模式：");
+    
+    // 策略特征
+    trait SortStrategy {
+        fn sort(&self, data: &mut [i32]);
+    }
+    
+    // 具体策略
+    struct BubbleSort;
+    
+    impl SortStrategy for BubbleSort {
+        fn sort(&self, data: &mut [i32]) {
+            for i in 0..data.len() {
+                for j in 0..data.len() - 1 - i {
+                    if data[j] > data[j + 1] {
+                        data.swap(j, j + 1);
+                    }
+                }
+            }
+        }
+    }
+    
+    struct QuickSort;
+    
+    impl SortStrategy for QuickSort {
+        fn sort(&self, data: &mut [i32]) {
+            if data.len() <= 1 {
+                return;
+            }
+            
+            let pivot = data.len() / 2;
+            let mut left = Vec::new();
+            let mut right = Vec::new();
+            
+            for (i, &item) in data.iter().enumerate() {
+                if i == pivot {
+                    continue;
+                }
+                if item < data[pivot] {
+                    left.push(item);
+                } else {
+                    right.push(item);
+                }
+            }
+            
+            self.sort(&mut left);
+            self.sort(&mut right);
+            
+            let mut result = Vec::new();
+            result.extend(left);
+            result.push(data[pivot]);
+            result.extend(right);
+            
+            data.copy_from_slice(&result);
+        }
+    }
+    
+    // 上下文
+    struct SortContext {
+        strategy: Box<dyn SortStrategy>,
+    }
+    
+    impl SortContext {
+        fn new(strategy: Box<dyn SortStrategy>) -> Self {
+            Self { strategy }
+        }
+        
+        fn execute_sort(&self, data: &mut [i32]) {
+            println!("使用策略排序前的数据: {:?}", data);
+            self.strategy.sort(data);
+            println!("使用策略排序后的数据: {:?}", data);
+        }
+        
+        #[allow(dead_code)]
+        fn set_strategy(&mut self, strategy: Box<dyn SortStrategy>) {
+            self.strategy = strategy;
+        }
+    }
+    
+    let data = vec![64, 34, 25, 12, 22, 11, 90];
+    
+    let bubble_sort = SortContext::new(Box::new(BubbleSort));
+    bubble_sort.execute_sort(&mut data.clone());
+    
+    let quick_sort = SortContext::new(Box::new(QuickSort));
+    quick_sort.execute_sort(&mut data.clone());
+}
+
+/// 演示装饰器模式
+pub fn decorator_pattern() {
+    println!("🎨 装饰器模式：");
+    
+    // 组件特征
+    trait DataSource {
+        fn write_data(&self, data: &str);
+        #[allow(dead_code)]
+        fn read_data(&self) -> String;
+    }
+    
+    // 具体组件
+    #[allow(dead_code)]
+    struct FileDataSource {
+        filename: String,
+        #[allow(dead_code)]
+        content: String,
+    }
+    
+    impl FileDataSource {
+        fn new(filename: String) -> Self {
+            Self {
+                filename,
+                content: String::new(),
+            }
+        }
+    }
+    
+    impl DataSource for FileDataSource {
+        fn write_data(&self, data: &str) {
+            println!("写入文件 {}: {}", self.filename, data);
+        }
+        
+        fn read_data(&self) -> String {
+            self.content.clone()
+        }
+    }
+    
+    // 装饰器基类
+    #[allow(dead_code)]
+    struct DataSourceDecorator {
+        wrappee: Box<dyn DataSource>,
+    }
+    
+    impl DataSourceDecorator {
+        #[allow(dead_code)]
+        fn new(source: Box<dyn DataSource>) -> Self {
+            Self { wrappee: source }
+        }
+    }
+    
+    impl DataSource for DataSourceDecorator {
+        fn write_data(&self, data: &str) {
+            self.wrappee.write_data(data);
+        }
+        
+        fn read_data(&self) -> String {
+            self.wrappee.read_data()
+        }
+    }
+    
+    // 具体装饰器
+    struct EncryptionDecorator {
+        wrappee: Box<dyn DataSource>,
+    }
+    
+    impl EncryptionDecorator {
+        fn new(source: Box<dyn DataSource>) -> Self {
+            Self { wrappee: source }
+        }
+        
+        fn encrypt(&self, data: &str) -> String {
+            data.chars().map(|c| {
+                if c.is_ascii_alphanumeric() {
+                    let base = if c.is_ascii_uppercase() { b'A' } else { b'a' };
+                    let offset = (c as u8 - base) + 1;
+                    let encrypted = ((offset + 13) % 26) + base;
+                    encrypted as char
+                } else {
+                    c
+                }
+            }).collect()
+        }
+        
+        #[allow(dead_code)]
+        fn decrypt(&self, data: &str) -> String {
+            self.encrypt(data) // ROT13是对称的
+        }
+    }
+    
+    impl DataSource for EncryptionDecorator {
+        fn write_data(&self, data: &str) {
+            let encrypted = self.encrypt(data);
+            println!("加密数据写入");
+            self.wrappee.write_data(&encrypted);
+        }
+        
+        fn read_data(&self) -> String {
+            let data = self.wrappee.read_data();
+            let decrypted = self.decrypt(&data);
+            println!("数据解密读取");
+            decrypted
+        }
+    }
+    
+    struct CompressionDecorator {
+        wrappee: Box<dyn DataSource>,
+    }
+    
+    impl CompressionDecorator {
+        fn new(source: Box<dyn DataSource>) -> Self {
+            Self { wrappee: source }
+        }
+        
+        fn compress(&self, data: &str) -> String {
+            // 模拟压缩
+            format!("[压缩] {}", data)
+        }
+        
+        #[allow(dead_code)]
+        fn decompress(&self, data: &str) -> String {
+            // 模拟解压
+            if data.starts_with("[压缩] ") {
+                data.strip_prefix("[压缩] ").unwrap().to_string()
+            } else {
+                data.to_string()
+            }
+        }
+    }
+    
+    impl DataSource for CompressionDecorator {
+        fn write_data(&self, data: &str) {
+            let compressed = self.compress(data);
+            println!("压缩数据写入");
+            self.wrappee.write_data(&compressed);
+        }
+        
+        fn read_data(&self) -> String {
+            let data = self.wrappee.read_data();
+            self.decompress(&data)
+        }
+    }
+    
+    // 客户端代码
+    let file_source = Box::new(FileDataSource::new("data.txt".to_string()));
+    
+    let encrypted_source = Box::new(EncryptionDecorator::new(file_source));
+    encrypted_source.write_data("敏感数据");
+    
+    let compressed_encrypted_source = Box::new(CompressionDecorator::new(encrypted_source));
+    compressed_encrypted_source.write_data("重要数据");
+}
+
+/// 演示观察者模式
+pub fn observer_pattern() {
+    println!("👀 观察者模式：");
+    
+    use std::collections::HashMap;
+    
+    // 观察者特征
+    trait Observer {
+        fn update(&self, event: &str, data: &str);
+    }
+    
+    #[derive(Debug)]
+    struct ConcreteObserver {
+        id: u32,
+        name: String,
+    }
+    
+    impl Observer for ConcreteObserver {
+        fn update(&self, event: &str, data: &str) {
+            println!("观察者 {} ({}) 收到通知 - 事件: {}, 数据: {}",
+                     self.id, self.name, event, data);
+        }
+    }
+    
+    // 主题特征
+    trait Subject {
+        fn attach(&mut self, observer: Box<dyn Observer>);
+        fn detach(&mut self, observer_id: u32);
+        fn notify(&self, event: &str, data: &str);
+    }
+    
+    // 具体主题
+    struct NewsAgency {
+        observers: HashMap<u32, Box<dyn Observer>>,
+        next_id: u32,
+    }
+    
+    impl NewsAgency {
+        fn new() -> Self {
+            Self {
+                observers: HashMap::new(),
+                next_id: 1,
+            }
+        }
+        
+        fn publish_news(&self, headline: String, content: String) {
+            println!("📰 发布新闻: {}", headline);
+            self.notify("news_published", &format!("{}: {}", headline, content));
+        }
+    }
+    
+    impl Subject for NewsAgency {
+        fn attach(&mut self, observer: Box<dyn Observer>) {
+            let id = self.next_id;
+            self.observers.insert(id, observer);
+            self.next_id += 1;
+            println!("✅ 新的观察者已注册，ID: {}", id);
+        }
+        
+        fn detach(&mut self, observer_id: u32) {
+            if self.observers.remove(&observer_id).is_some() {
+                println!("❌ 观察者 {} 已注销", observer_id);
+            }
+        }
+        
+        fn notify(&self, event: &str, data: &str) {
+            for (id, observer) in &self.observers {
+                observer.update(event, data);
+                println!("📡 通知观察者 {} 已更新", id);
+            }
+        }
+    }
+    
+    // 客户端代码
+    let mut news_agency = NewsAgency::new();
+    
+    let observer1 = Box::new(ConcreteObserver { id: 1, name: "新闻网站".to_string() });
+    let observer2 = Box::new(ConcreteObserver { id: 2, name: "手机APP".to_string() });
+    let observer3 = Box::new(ConcreteObserver { id: 3, name: "邮件服务".to_string() });
+    
+    news_agency.attach(observer1);
+    news_agency.attach(observer2);
+    news_agency.attach(observer3);
+    
+    news_agency.publish_news("突发新闻".to_string(), "Rust 2.0发布了！".to_string());
+    
+    news_agency.detach(2);
+    
+    news_agency.publish_news("技术新闻".to_string(), "WebAssembly获得新特性".to_string());
+}
+
+/// 演示建造者模式
+pub fn builder_pattern() {
+    println!("🔧 建造者模式：");
+    
+    // 产品
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct Email {
+        to: String,
+        from: String,
+        subject: String,
+        body: String,
+        attachments: Vec<String>,
+        priority: String,
+    }
+    
+    // 建造者特征
+    trait EmailBuilder {
+        fn new() -> Self;
+        fn to(&mut self, email: &str) -> &mut Self;
+        fn from(&mut self, email: &str) -> &mut Self;
+        fn subject(&mut self, subject: &str) -> &mut Self;
+        fn body(&mut self, body: &str) -> &mut Self;
+        fn attachment(&mut self, file: &str) -> &mut Self;
+        fn priority(&mut self, priority: &str) -> &mut Self;
+        fn build(&mut self) -> Email;
+    }
+    
+    // 具体建造者
+    struct ConcreteEmailBuilder {
+        to: Option<String>,
+        from: Option<String>,
+        subject: Option<String>,
+        body: Option<String>,
+        attachments: Vec<String>,
+        priority: Option<String>,
+    }
+    
+    impl EmailBuilder for ConcreteEmailBuilder {
+        fn new() -> Self {
+            Self {
+                to: None,
+                from: None,
+                subject: None,
+                body: None,
+                attachments: Vec::new(),
+                priority: None,
+            }
+        }
+        
+        fn to(&mut self, email: &str) -> &mut Self {
+            self.to = Some(email.to_string());
+            self
+        }
+        
+        fn from(&mut self, email: &str) -> &mut Self {
+            self.from = Some(email.to_string());
+            self
+        }
+        
+        fn subject(&mut self, subject: &str) -> &mut Self {
+            self.subject = Some(subject.to_string());
+            self
+        }
+        
+        fn body(&mut self, body: &str) -> &mut Self {
+            self.body = Some(body.to_string());
+            self
+        }
+        
+        fn attachment(&mut self, file: &str) -> &mut Self {
+            self.attachments.push(file.to_string());
+            self
+        }
+        
+        fn priority(&mut self, priority: &str) -> &mut Self {
+            self.priority = Some(priority.to_string());
+            self
+        }
+        
+        fn build(&mut self) -> Email {
+            Email {
+                to: self.to.clone().unwrap_or_else(|| "unknown@domain.com".to_string()),
+                from: self.from.clone().unwrap_or_else(|| "noreply@domain.com".to_string()),
+                subject: self.subject.clone().unwrap_or_else(|| "无主题".to_string()),
+                body: self.body.clone().unwrap_or_else(|| "无内容".to_string()),
+                attachments: self.attachments.clone(),
+                priority: self.priority.clone().unwrap_or_else(|| "普通".to_string()),
+            }
+        }
+    }
+    
+    // 客户端代码
+    let mut email_builder = ConcreteEmailBuilder::new();
+    
+    let email = email_builder
+        .to("user@example.com")
+        .from("support@company.com")
+        .subject("重要通知")
+        .body("这是一个重要的系统通知，请查收附件。")
+        .attachment("report.pdf")
+        .attachment("data.xlsx")
+        .priority("高")
+        .build();
+    
+    println!("📧 生成的邮件: {:?}", email);
+    
+    // 另一个例子
+    let mut simple_email = ConcreteEmailBuilder::new();
+    let simple_mail = simple_email
+        .to("friend@example.com")
+        .subject("问候")
+        .body("你好，希望你一切都好！")
+        .build();
+    
+    println!("📧 简单邮件: {:?}", simple_mail);
+}
+
 /// 运行高级类型和生命周期示例
 pub fn run_advanced_types_examples() {
     println!("🎯 === 现代化高级类型和生命周期示例 ===");
@@ -418,4 +961,31 @@ pub fn run_advanced_types_examples() {
     modern_newtype_pattern();
     
     println!("\n✅ 所有高级类型和生命周期示例运行完成！");
+}
+
+/// 运行设计模式示例
+pub fn run_design_pattern_examples() {
+    println!("🎯 === 设计模式示例 ===");
+    println!();
+    
+    println!("=== 工厂模式 ===");
+    factory_pattern();
+    println!();
+    
+    println!("=== 策略模式 ===");
+    strategy_pattern();
+    println!();
+    
+    println!("=== 装饰器模式 ===");
+    decorator_pattern();
+    println!();
+    
+    println!("=== 观察者模式 ===");
+    observer_pattern();
+    println!();
+    
+    println!("=== 建造者模式 ===");
+    builder_pattern();
+    
+    println!("\n✅ 所有设计模式示例运行完成！");
 }

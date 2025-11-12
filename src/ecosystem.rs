@@ -3,7 +3,7 @@
 //! 这个模块演示了Rust生态系统的重要工具和概念。
 //! 采用了现代化的Rust 2021/2024生态系统最佳实践。
 
-use std::process::Command;
+
 
 /// 现代化Cargo使用指南
 pub fn modern_cargo_usage() {

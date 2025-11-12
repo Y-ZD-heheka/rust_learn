@@ -100,6 +100,307 @@ pub fn control_flow() {
     println!("偶数的平方: {:?}", even_squares);
 }
 
+/// 演示现代化数据结构实现
+pub fn modern_data_structures() {
+    println!("🏗️ 现代化数据结构：");
+    
+    // 现代化整数栈实现
+    #[derive(Debug)]
+    struct ModernStack {
+        items: Vec<i32>,
+    }
+    
+    impl ModernStack {
+        fn new() -> Self {
+            Self { items: Vec::new() }
+        }
+        
+        fn push(&mut self, item: i32) {
+            self.items.push(item);
+            println!("📦 压入: {}", item);
+        }
+        
+        fn pop(&mut self) -> Option<i32> {
+            self.items.pop()
+        }
+        
+        fn peek(&self) -> Option<&i32> {
+            self.items.last()
+        }
+        
+        fn is_empty(&self) -> bool {
+            self.items.is_empty()
+        }
+        
+        fn len(&self) -> usize {
+            self.items.len()
+        }
+    }
+    
+    let mut stack = ModernStack::new();
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    
+    println!("栈顶元素: {:?}", stack.peek());
+    println!("栈大小: {}", stack.len());
+    
+    while let Some(item) = stack.pop() {
+        println!("弹出: {}", item);
+    }
+    
+    // 现代化字符串队列实现
+    #[derive(Debug)]
+    struct ModernQueue {
+        items: Vec<String>,
+        index: usize,
+    }
+    
+    impl ModernQueue {
+        fn new() -> Self {
+            Self { items: Vec::new(), index: 0 }
+        }
+        
+        fn enqueue(&mut self, item: &str) {
+            self.items.push(item.to_string());
+            println!("➕ 入队: {}", item);
+        }
+        
+        fn dequeue(&mut self) -> Option<String> {
+            if self.index < self.items.len() {
+                let item = Some(self.items[self.index].clone());
+                self.index += 1;
+                
+                // 清理已出队的元素
+                if self.index * 2 > self.items.len() {
+                    self.items = self.items[self.index..].to_vec();
+                    self.index = 0;
+                }
+                
+                item
+            } else {
+                None
+            }
+        }
+        
+        fn is_empty(&self) -> bool {
+            self.index >= self.items.len()
+        }
+    }
+    
+    let mut queue = ModernQueue::new();
+    queue.enqueue("任务1");
+    queue.enqueue("任务2");
+    queue.enqueue("任务3");
+    
+    while let Some(item) = queue.dequeue() {
+        println!("处理: {}", item);
+    }
+}
+
+/// 演示高级算法实现
+pub fn advanced_algorithms() {
+    println!("🔬 高级算法实现：");
+    
+    // 现代化排序算法 - 适用可比较类型
+    fn quick_sort<T: PartialOrd + std::fmt::Display + Clone>(arr: &mut [T]) {
+        if arr.len() <= 1 {
+            return;
+        }
+        
+        let pivot = arr.len() / 2;
+        let pivot_value = arr[pivot].clone();
+        
+        let mut left = Vec::new();
+        let mut right = Vec::new();
+        
+        for (i, item) in arr.iter().enumerate() {
+            if i == pivot {
+                continue;
+            }
+            
+            if item < &pivot_value {
+                left.push(item.clone());
+            } else {
+                right.push(item.clone());
+            }
+        }
+        
+        // 递归排序
+        quick_sort(&mut left);
+        quick_sort(&mut right);
+        
+        // 合并结果
+        let mut result = left;
+        result.push(pivot_value);
+        result.extend(right);
+        
+        // 复制回原数组
+        for (i, item) in result.iter().enumerate() {
+            arr[i] = item.clone();
+        }
+    }
+    
+    let mut numbers = vec![64, 34, 25, 12, 22, 11, 90];
+    println!("排序前: {:?}", numbers);
+    quick_sort(&mut numbers);
+    println!("排序后: {:?}", numbers);
+    
+    // 二分查找算法
+    fn binary_search(arr: &[i32], target: i32) -> Option<usize> {
+        let mut left = 0;
+        let mut right = arr.len();
+        
+        while left < right {
+            let mid = left + (right - left) / 2;
+            if arr[mid] == target {
+                return Some(mid);
+            } else if arr[mid] < target {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        None
+    }
+    
+    match binary_search(&numbers, 25) {
+        Some(index) => println!("找到目标25在索引: {}", index),
+        None => println!("未找到目标"),
+    }
+    
+    // 现代化斐波那契数列（记忆化）
+    fn fibonacci_memo(n: usize, memo: &mut Vec<u64>) -> u64 {
+        if n <= 1 {
+            return n as u64;
+        }
+        
+        if memo[n] != 0 {
+            return memo[n];
+        }
+        
+        memo[n] = fibonacci_memo(n - 1, memo) + fibonacci_memo(n - 2, memo);
+        memo[n]
+    }
+    
+    let n = 10;
+    let mut memo = vec![0; n + 1];
+    let result = fibonacci_memo(n, &mut memo);
+    println!("斐波那契数列第{}项: {}", n, result);
+}
+
+/// 演示闭包和高阶函数
+pub fn closures_and_higher_order_functions() {
+    println!("🎯 闭包和高阶函数：");
+    
+    // 现代化闭包使用
+    let add = |a: i32, b: i32| -> i32 { a + b };
+    let multiply = |x: i32| { x * 2 };
+    let greet = |name: &str| format!("你好, {}", name);
+    
+    println!("加法: {}", add(5, 3));
+    println!("乘法: {}", multiply(7));
+    println!("问候: {}", greet("世界"));
+    
+    // 高阶函数示例
+    let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    // 函数式编程操作链
+    let result: Vec<String> = numbers
+        .iter()
+        .filter(|&&x| x % 2 == 0) // 过滤偶数
+        .map(|x| x * x) // 平方
+        .enumerate() // 添加索引
+        .map(|(i, x)| format!("位置{}: {}", i + 1, x)) // 格式化
+        .collect();
+    
+    println!("处理结果: {:?}", result);
+    
+    // 现代化回调函数
+    fn process_data<F>(data: Vec<i32>, processor: F) -> Vec<i32>
+    where
+        F: Fn(i32) -> i32,
+    {
+        data.into_iter().map(processor).collect()
+    }
+    
+    let original = vec![1, 2, 3, 4, 5];
+    let processed = process_data(original, |x| {
+        if x % 2 == 0 {
+            x * 2
+        } else {
+            x * 3
+        }
+    });
+    
+    println!("处理后的数据: {:?}", processed);
+    
+    // 现代化状态闭包
+    fn create_counter(start: i32) -> impl FnMut() -> i32 {
+        let mut current = start;
+        move || {
+            current += 1;
+            current - 1
+        }
+    }
+    
+    let mut counter = create_counter(0);
+    println!("计数器: {}", counter());
+    println!("计数器: {}", counter());
+    println!("计数器: {}", counter());
+}
+
+/// 演示文件操作和IO
+pub fn file_operations() {
+    println!("📁 文件操作和IO：");
+    
+    use std::fs;
+    // 创建测试文件
+    let test_file = "test_data.txt";
+    let content = "Hello, Rust!\n这是一个测试文件\n包含多行数据";
+    
+    match fs::write(test_file, content) {
+        Ok(_) => println!("✅ 创建测试文件成功"),
+        Err(e) => println!("❌ 创建文件失败: {}", e),
+    }
+    
+    // 读取文件内容
+    match fs::read_to_string(test_file) {
+        Ok(contents) => {
+            println!("📖 文件内容:");
+            for (i, line) in contents.lines().enumerate() {
+                println!("  {}: {}", i + 1, line);
+            }
+        }
+        Err(e) => println!("❌ 读取文件失败: {}", e),
+    }
+    
+    // 检查文件是否存在
+    if fs::metadata(test_file).is_ok() {
+        println!("📊 文件信息:");
+        let metadata = fs::metadata(test_file).unwrap();
+        println!("  大小: {} 字节", metadata.len());
+        println!("  权限: {:?}", metadata.permissions());
+    }
+    
+    // 清理测试文件
+    if let Err(e) = fs::remove_file(test_file) {
+        println!("⚠️ 清理文件失败: {}", e);
+    }
+    
+    // 演示目录操作
+    if let Ok(entries) = fs::read_dir(".") {
+        println!("📂 当前目录内容:");
+        for entry in entries.take(5) { // 只显示前5个
+            if let Ok(entry) = entry {
+                if let Some(name) = entry.file_name().to_str() {
+                    println!("  📄 {}", name);
+                }
+            }
+        }
+    }
+}
+
 /// 演示错误处理的现代化模式
 pub fn error_handling_patterns() {
     println!("⚡ 现代化错误处理：");
@@ -124,6 +425,21 @@ pub fn error_handling_patterns() {
     match complex_calculation(12.0) {
         Ok(result) => println!("复杂计算结果: {}", result),
         Err(e) => println!("计算错误: {}", e),
+    }
+    
+    // 现代化错误处理链
+    fn parse_number(s: &str) -> Result<i32, String> {
+        s.trim().parse()
+            .map_err(|e| format!("数字解析失败: {}", e))
+    }
+    
+    let test_cases = vec!["42", "abc", ""];
+    
+    for case in test_cases {
+        match parse_number(case) {
+            Ok(num) => println!("✅ '{}' -> {}", case, num),
+            Err(e) => println!("❌ '{}' -> 错误: {}", case, e),
+        }
     }
 }
 
@@ -163,6 +479,38 @@ pub fn modern_enums_and_patterns() {
     for (i, shape) in shapes.iter().enumerate() {
         println!("形状{}的面积: {:.2}", i + 1, shape.area());
     }
+    
+    // 复杂的状态机枚举
+    #[derive(Debug)]
+    enum TrafficLight {
+        Red,
+        Yellow,
+        Green,
+    }
+    
+    impl TrafficLight {
+        fn next(&self) -> Self {
+            match self {
+                TrafficLight::Red => TrafficLight::Green,
+                TrafficLight::Green => TrafficLight::Yellow,
+                TrafficLight::Yellow => TrafficLight::Red,
+            }
+        }
+        
+        fn get_duration(&self) -> u8 {
+            match self {
+                TrafficLight::Red => 30,
+                TrafficLight::Yellow => 5,
+                TrafficLight::Green => 25,
+            }
+        }
+    }
+    
+    let mut light = TrafficLight::Red;
+    for i in 0..4 {
+        println!("第{}阶段: {:?} (持续{}秒)", i + 1, light, light.get_duration());
+        light = light.next();
+    }
 }
 
 /// 运行基础语法示例
@@ -177,6 +525,18 @@ pub fn run_basics_examples() {
     println!();
     
     control_flow();
+    println!();
+    
+    modern_data_structures();
+    println!();
+    
+    advanced_algorithms();
+    println!();
+    
+    closures_and_higher_order_functions();
+    println!();
+    
+    file_operations();
     println!();
     
     error_handling_patterns();

@@ -105,7 +105,7 @@ fn run_all_examples() -> Result<(), AppError> {
     
     let start_time = Instant::now();
     let mut success_count = 0;
-    let mut total_modules = MODULE_REGISTRY.len();
+    let total_modules = MODULE_REGISTRY.len();
 
     for (index, module) in MODULE_REGISTRY.iter().enumerate() {
         print!("[{}/{}] 执行模块: {} - {} ...",
@@ -119,7 +119,7 @@ fn run_all_examples() -> Result<(), AppError> {
                 println!(" ✅ 完成 ({:.2}ms)", duration.as_millis());
                 success_count += 1;
             }
-            Err(e) => {
+            Err(_e) => {
                 println!(" ❌ 失败");
                 eprintln!("⚠️ 模块 '{}' 执行失败", module.name);
             }

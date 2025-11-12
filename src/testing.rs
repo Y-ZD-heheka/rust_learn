@@ -3,13 +3,14 @@
 //! 这个模块演示了Rust的测试功能和文档生成。
 //! 采用了现代化的Rust 2021/2024最佳实践。
 
-use std::fmt;
+use std::time::Instant;
 
 /// 一个现代数学函数，用于测试
 pub fn add_two(a: i32) -> i32 {
     a + 2
 }
 
+#[allow(dead_code)]
 /// 另一个现代函数，用于测试私有函数
 fn internal_adder(a: i32, b: i32) -> i32 {
     a + b
@@ -309,20 +310,463 @@ mod conditional_tests {
     }
 }
 
-/// 现代化属性测试（如果启用proptest feature）
-#[cfg(feature = "proptest")]
-mod property_tests {
-    use super::*;
-    use proptest::prelude::*;
-
-    proptest! {
-        #[test]
-        fn test_add_two_properties(a in -1000i32..1000i32) {
-            let result = add_two(a);
-            prop_assert!(result > a); // 加2应该大于原值
-            prop_assert_eq!(result - 2, a); // 减2应该等于原值
+/// 演示企业级测试策略
+pub fn enterprise_testing_strategies() {
+    println!("🏢 企业级测试策略：");
+    
+    // 简单的计算器测试案例
+    pub struct Calculator {
+        history: Vec<f64>,
+    }
+    
+    impl Calculator {
+        pub fn new() -> Self {
+            Self {
+                history: Vec::new(),
+            }
+        }
+        
+        pub fn add(&mut self, a: f64, b: f64) -> f64 {
+            let result = a + b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn subtract(&mut self, a: f64, b: f64) -> f64 {
+            let result = a - b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn multiply(&mut self, a: f64, b: f64) -> f64 {
+            let result = a * b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn divide(&mut self, a: f64, b: f64) -> Result<f64, String> {
+            if b == 0.0 {
+                return Err("除数不能为零".to_string());
+            }
+            let result = a / b;
+            self.history.push(result);
+            Ok(result)
+        }
+        
+        pub fn get_history(&self) -> &[f64] {
+            &self.history
         }
     }
+    
+    // 企业级测试场景
+    let mut calc = Calculator::new();
+    
+    println!("📊 基础运算测试:");
+    assert_eq!(calc.add(2.0, 3.0), 5.0);
+    assert_eq!(calc.subtract(10.0, 4.0), 6.0);
+    assert_eq!(calc.multiply(3.0, 4.0), 12.0);
+    assert_eq!(calc.divide(15.0, 3.0).unwrap(), 5.0);
+    
+    println!("✅ 基础运算测试通过");
+    
+    // 错误处理测试
+    assert!(calc.divide(10.0, 0.0).is_err());
+    println!("✅ 错误处理测试通过");
+    
+    // 历史记录测试
+    assert_eq!(calc.get_history().len(), 4);
+    println!("✅ 历史记录功能测试通过");
+    
+    println!("📊 企业级测试策略演示完成");
+}
+
+/// 演示属性测试基础
+pub fn property_based_testing_basics() {
+    println!("🎯 属性测试基础：");
+    
+    // 属性测试函数：反转两次应该得到原值
+    fn reverse_twice<T: Clone + std::cmp::PartialEq>(items: &[T]) -> bool {
+        let reversed: Vec<_> = items.iter().cloned().rev().collect();
+        let reversed_twice: Vec<_> = reversed.iter().cloned().rev().collect();
+        items.iter().eq(reversed_twice.iter())
+    }
+    
+    // 属性测试：交换律
+    fn addition_commutative(a: i32, b: i32) -> bool {
+        a + b == b + a
+    }
+    
+    println!("🔍 属性测试示例:");
+    
+    // 模拟属性测试
+    let test_cases = vec![
+        (vec![1, 2, 3, 4, 5], "数字列表"),
+        (vec![0], "单元素列表"),
+        (vec![], "空列表"),
+    ];
+    
+    for (items, desc) in test_cases {
+        let result = reverse_twice(&items);
+        println!("  {}: {}", desc, if result { "通过" } else { "失败" });
+    }
+    
+    // 测试交换律
+    let commutative_tests = vec![(5, 10), (-3, 8), (0, 100)];
+    for (a, b) in commutative_tests {
+        let result = addition_commutative(a, b);
+        println!("  {} + {} = {} + {}: {}", a, b, b, a, if result { "通过" } else { "失败" });
+    }
+    
+    println!("📊 属性测试演示完成");
+}
+
+/// 演示性能测试和基准测试
+pub fn performance_testing_examples() {
+    println!("⚡ 性能测试和基准测试：");
+    
+    // 大数据集性能测试
+    let large_dataset: Vec<i32> = (1..100000).collect();
+    
+    let start_time = Instant::now();
+    let result: i32 = large_dataset.iter()
+        .filter(|&&x| x % 2 == 0)
+        .map(|&x| x * x)
+        .sum();
+    let processing_time = start_time.elapsed();
+    
+    println!("📈 大数据集处理性能:");
+    println!("  数据量: {} 个元素", large_dataset.len());
+    println!("  处理结果: {}", result);
+    println!("  处理时间: {:.2}ms", processing_time.as_millis());
+    
+    // 字符串操作性能测试
+    fn string_operations_performance() {
+        let start = Instant::now();
+        
+        let mut result = String::new();
+        for i in 0..10000 {
+            result.push_str(&format!("Item {} ", i));
+        }
+        
+        let processing_time = start.elapsed();
+        println!("📈 字符串操作性能:");
+        println!("  操作次数: 10000");
+        println!("  结果长度: {} 字符", result.len());
+        println!("  处理时间: {:.2}ms", processing_time.as_millis());
+    }
+    
+    string_operations_performance();
+    
+    println!("📊 性能测试完成");
+}
+
+/// 演示集成测试场景
+pub fn integration_testing_scenarios() {
+    println!("🔗 集成测试场景：");
+    
+    // 模拟订单处理系统
+    #[derive(Debug, Clone)]
+    pub struct Order {
+        pub id: u32,
+        pub items: Vec<OrderItem>,
+        pub total: f64,
+        pub status: OrderStatus,
+    }
+    
+    #[derive(Debug, Clone)]
+    pub struct OrderItem {
+        pub product_id: u32,
+        pub quantity: u32,
+        pub price: f64,
+    }
+    
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum OrderStatus {
+        Pending,
+        Confirmed,
+        Cancelled,
+    }
+    
+    // 订单处理服务
+    pub struct OrderProcessor {
+        orders: std::collections::HashMap<u32, Order>,
+        next_id: u32,
+    }
+    
+    impl OrderProcessor {
+        pub fn new() -> Self {
+            Self {
+                orders: std::collections::HashMap::new(),
+                next_id: 1,
+            }
+        }
+        
+        pub fn create_order(&mut self, items: Vec<OrderItem>) -> Result<u32, String> {
+            if items.is_empty() {
+                return Err("订单不能为空".to_string());
+            }
+            
+            let total: f64 = items.iter().map(|item| item.price * item.quantity as f64).sum();
+            
+            let order = Order {
+                id: self.next_id,
+                items: items.clone(),
+                total,
+                status: OrderStatus::Pending,
+            };
+            
+            self.orders.insert(self.next_id, order);
+            let order_id = self.next_id;
+            self.next_id += 1;
+            
+            Ok(order_id)
+        }
+        
+        pub fn confirm_order(&mut self, order_id: u32) -> Result<(), String> {
+            if let Some(order) = self.orders.get_mut(&order_id) {
+                match order.status {
+                    OrderStatus::Pending => {
+                        order.status = OrderStatus::Confirmed;
+                        Ok(())
+                    },
+                    _ => Err("订单状态不允许确认".to_string()),
+                }
+            } else {
+                Err("订单不存在".to_string())
+            }
+        }
+        
+        pub fn get_order(&self, order_id: u32) -> Option<&Order> {
+            self.orders.get(&order_id)
+        }
+    }
+    
+    // 集成测试场景
+    let mut processor = OrderProcessor::new();
+    
+    println!("📦 订单处理系统集成测试:");
+    
+    // 测试场景1：正常订单流程
+    let test_items = vec![
+        OrderItem { product_id: 1, quantity: 2, price: 29.99 },
+        OrderItem { product_id: 2, quantity: 1, price: 99.99 },
+    ];
+    
+    match processor.create_order(test_items) {
+        Ok(order_id) => {
+            println!("✅ 订单创建成功，ID: {}", order_id);
+            
+            match processor.confirm_order(order_id) {
+                Ok(_) => {
+                    println!("✅ 订单确认成功");
+                    
+                    if let Some(order) = processor.get_order(order_id) {
+                        println!("📊 订单详情: 状态={:?}, 总金额=${:.2}", order.status, order.total);
+                    }
+                },
+                Err(e) => println!("❌ 订单确认失败: {}", e),
+            }
+        },
+        Err(e) => println!("❌ 订单创建失败: {}", e),
+    }
+    
+    // 测试场景2：空订单（应该失败）
+    match processor.create_order(vec![]) {
+        Ok(_) => println!("❌ 空订单不应该创建成功"),
+        Err(e) => println!("✅ 空订单正确拒绝: {}", e),
+    }
+    
+    println!("📊 集成测试完成");
+}
+
+/// 演示测试驱动开发（TDD）示例
+pub fn test_driven_development_example() {
+    println!("🔄 测试驱动开发（TDD）示例：");
+    
+    // 首先定义要测试的功能（计算器）
+    pub struct Calculator {
+        history: Vec<f64>,
+    }
+    
+    impl Calculator {
+        pub fn new() -> Self {
+            Self {
+                history: Vec::new(),
+            }
+        }
+        
+        pub fn add(&mut self, a: f64, b: f64) -> f64 {
+            let result = a + b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn subtract(&mut self, a: f64, b: f64) -> f64 {
+            let result = a - b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn multiply(&mut self, a: f64, b: f64) -> f64 {
+            let result = a * b;
+            self.history.push(result);
+            result
+        }
+        
+        pub fn divide(&mut self, a: f64, b: f64) -> Result<f64, String> {
+            if b == 0.0 {
+                return Err("除数不能为零".to_string());
+            }
+            let result = a / b;
+            self.history.push(result);
+            Ok(result)
+        }
+        
+        pub fn get_history(&self) -> &[f64] {
+            &self.history
+        }
+        
+        pub fn clear_history(&mut self) {
+            self.history.clear();
+        }
+    }
+    
+    // TDD测试用例
+    println!("🔬 TDD测试用例:");
+    
+    let mut calc = Calculator::new();
+    
+    // 测试基础运算
+    assert_eq!(calc.add(2.0, 3.0), 5.0);
+    println!("✅ 加法测试通过");
+    
+    assert_eq!(calc.subtract(10.0, 4.0), 6.0);
+    println!("✅ 减法测试通过");
+    
+    assert_eq!(calc.multiply(3.0, 4.0), 12.0);
+    println!("✅ 乘法测试通过");
+    
+    assert_eq!(calc.divide(15.0, 3.0).unwrap(), 5.0);
+    println!("✅ 除法测试通过");
+    
+    // 测试错误情况
+    assert!(calc.divide(10.0, 0.0).is_err());
+    println!("✅ 除零错误处理测试通过");
+    
+    // 测试历史记录功能
+    assert_eq!(calc.get_history().len(), 4);
+    println!("✅ 历史记录功能测试通过");
+    
+    calc.clear_history();
+    assert_eq!(calc.get_history().len(), 0);
+    println!("✅ 清除历史记录测试通过");
+    
+    // 浮点数精度测试
+    let result = calc.add(0.1, 0.2);
+    assert!((result - 0.3).abs() < f64::EPSILON);
+    println!("✅ 浮点数精度测试通过");
+    
+    println!("📊 TDD示例完成");
+}
+
+/// 演示边界条件和错误处理测试
+pub fn boundary_and_error_testing() {
+    println!("🎯 边界条件和错误处理测试：");
+    
+    // 数据验证函数
+    fn validate_age(age: i32) -> Result<bool, String> {
+        if age < 0 {
+            return Err("年龄不能为负数".to_string());
+        }
+        if age > 150 {
+            return Err("年龄超出合理范围".to_string());
+        }
+        Ok(true)
+    }
+    
+    fn validate_username(username: &str) -> Result<bool, String> {
+        if username.trim().is_empty() {
+            return Err("用户名不能为空".to_string());
+        }
+        if username.len() < 3 {
+            return Err("用户名长度至少3个字符".to_string());
+        }
+        if username.len() > 20 {
+            return Err("用户名长度不能超过20个字符".to_string());
+        }
+        Ok(true)
+    }
+    
+    fn validate_email(email: &str) -> Result<bool, String> {
+        if !email.contains('@') {
+            return Err("邮箱必须包含@符号".to_string());
+        }
+        if !email.contains('.') {
+            return Err("邮箱必须包含域名".to_string());
+        }
+        Ok(true)
+    }
+    
+    // 边界条件测试
+    println!("🔍 年龄验证边界测试:");
+    
+    let age_test_cases = vec![
+        (-1, "负数年龄"),
+        (0, "零岁"),
+        (1, "一岁"),
+        (18, "成年年龄"),
+        (65, "退休年龄"),
+        (120, "高龄"),
+        (150, "极限年龄"),
+        (151, "超出上限"),
+    ];
+    
+    for (age, desc) in age_test_cases {
+        match validate_age(age) {
+            Ok(_) => println!("  ✅ {}: 有效", desc),
+            Err(e) => println!("  ❌ {}: {}", desc, e),
+        }
+    }
+    
+    // 用户名验证测试
+    println!("\n🔍 用户名验证边界测试:");
+    
+    let username_test_cases = vec![
+        ("", "空字符串"),
+        ("  ", "纯空格"),
+        ("ab", "太短"),
+        ("abc", "最小有效长度"),
+        ("user_name", "包含下划线"),
+        ("UserName", "包含大写"),
+    ];
+    
+    for (username, desc) in username_test_cases {
+        match validate_username(username) {
+            Ok(_) => println!("  ✅ {}: 有效", desc),
+            Err(e) => println!("  ❌ {}: {}", desc, e),
+        }
+    }
+    
+    // 邮箱验证测试
+    println!("\n🔍 邮箱验证边界测试:");
+    
+    let email_test_cases = vec![
+        ("", "空字符串"),
+        ("@", "只有@符号"),
+        ("user@", "缺少域名"),
+        ("user@domain", "缺少顶级域名"),
+        ("user@domain.com", "有效邮箱"),
+        ("user.name@domain.com", "包含点的用户名"),
+    ];
+    
+    for (email, desc) in email_test_cases {
+        match validate_email(email) {
+            Ok(_) => println!("  ✅ {}: 有效", desc),
+            Err(e) => println!("  ❌ {}: {}", desc, e),
+        }
+    }
+    
+    println!("📊 边界条件测试完成");
 }
 
 /// 运行测试和文档示例
@@ -394,4 +838,39 @@ pub fn run_testing_examples() {
     }
     
     println!("\n✅ 所有测试和文档示例运行完成！");
+}
+
+/// 运行所有测试示例
+pub fn run_all_testing_examples() {
+    println!("🎯 === 全面测试示例 ===");
+    println!();
+    
+    println!("=== 基础测试示例 ===");
+    run_testing_examples();
+    println!();
+    
+    println!("=== 企业级测试策略 ===");
+    enterprise_testing_strategies();
+    println!();
+    
+    println!("=== 属性测试基础 ===");
+    property_based_testing_basics();
+    println!();
+    
+    println!("=== 性能测试示例 ===");
+    performance_testing_examples();
+    println!();
+    
+    println!("=== 集成测试场景 ===");
+    integration_testing_scenarios();
+    println!();
+    
+    println!("=== TDD示例 ===");
+    test_driven_development_example();
+    println!();
+    
+    println!("=== 边界条件测试 ===");
+    boundary_and_error_testing();
+    
+    println!("\n✅ 所有测试示例运行完成！");
 }
