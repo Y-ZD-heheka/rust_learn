@@ -14,3 +14,4 @@ pub mod advanced_types;
 pub mod testing;
 pub mod popular_libraries;
 pub mod ecosystem;
+pub mod advanced_patterns;

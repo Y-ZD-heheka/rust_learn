@@ -396,25 +396,94 @@ pub fn property_based_testing_basics() {
         a + b == b + a
     }
     
+    // 属性测试：结合律
+    fn addition_associative(a: i32, b: i32, c: i32) -> bool {
+        (a + b) + c == a + (b + c)
+    }
+    
+    // 属性测试：乘法分配律
+    fn multiplication_distributive(a: i32, b: i32, c: i32) -> bool {
+        a * (b + c) == a * b + a * c
+    }
+    
+    // 属性测试：质数检查
+    fn is_prime(n: u32) -> bool {
+        if n <= 1 {
+            return false;
+        }
+        if n <= 3 {
+            return true;
+        }
+        if n % 2 == 0 || n % 3 == 0 {
+            return false;
+        }
+        let mut i = 5;
+        while i * i <= n {
+            if n % i == 0 || n % (i + 2) == 0 {
+                return false;
+            }
+            i += 6;
+        }
+        true
+    }
+    
+    // 属性测试：阶乘函数的逆函数
+    fn factorial_property(n: u32) -> bool {
+        if n == 0 || n == 1 {
+            return true;
+        }
+        let result = factorial(n);
+        result > 0 && result >= n as u64
+    }
+    
+    fn factorial(n: u32) -> u64 {
+        (1..=n as u64).product::<u64>()
+    }
+    
     println!("🔍 属性测试示例:");
     
-    // 模拟属性测试
-    let test_cases = vec![
+    // 1. 反转测试
+    let reverse_test_cases = vec![
         (vec![1, 2, 3, 4, 5], "数字列表"),
         (vec![0], "单元素列表"),
         (vec![], "空列表"),
+        (vec![1, 2, 3], "整数列表"),
     ];
     
-    for (items, desc) in test_cases {
+    for (items, desc) in reverse_test_cases {
         let result = reverse_twice(&items);
-        println!("  {}: {}", desc, if result { "通过" } else { "失败" });
+        println!("  反转测试 - {}: {}", desc, if result { "✅ 通过" } else { "❌ 失败" });
     }
     
-    // 测试交换律
-    let commutative_tests = vec![(5, 10), (-3, 8), (0, 100)];
-    for (a, b) in commutative_tests {
-        let result = addition_commutative(a, b);
-        println!("  {} + {} = {} + {}: {}", a, b, b, a, if result { "通过" } else { "失败" });
+    // 2. 算术运算属性
+    println!("\n  算术运算属性:");
+    let arithmetic_tests = vec![
+        ((5, 10), "交换律"),
+        ((3, 7), "结合律"),
+        ((4, 2), "分配律"),
+    ];
+    
+    for (data, desc) in arithmetic_tests {
+        let result = match data {
+            (a, b) => addition_commutative(a, b),
+            (a, b) => addition_associative(a, b, 0), // 第三个参数占位符
+        };
+        println!("    {}: {}", desc, if result { "✅ 通过" } else { "❌ 失败" });
+    }
+    
+    // 3. 质数属性测试
+    println!("\n  质数属性测试:");
+    let prime_tests = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+    for &num in &prime_tests {
+        let result = is_prime(num);
+        println!("    {} 是质数: {}", num, if result { "✅ 正确" } else { "❌ 错误" });
+    }
+    
+    // 4. 阶乘属性测试
+    println!("\n  阶乘属性测试:");
+    for n in 0..10 {
+        let result = factorial_property(n);
+        println!("    阶乘({}) 属性: {}", n, if result { "✅ 通过" } else { "❌ 失败" });
     }
     
     println!("📊 属性测试演示完成");
@@ -423,6 +492,8 @@ pub fn property_based_testing_basics() {
 /// 演示性能测试和基准测试
 pub fn performance_testing_examples() {
     println!("⚡ 性能测试和基准测试：");
+    
+    use std::time::{Duration, Instant};
     
     // 大数据集性能测试
     let large_dataset: Vec<i32> = (1..100000).collect();
@@ -457,7 +528,206 @@ pub fn performance_testing_examples() {
     
     string_operations_performance();
     
+    // 数据结构性能对比
+    println!("\n📊 数据结构性能对比:");
+    
+    // Vec vs HashMap 查找性能
+    let data: Vec<i32> = (1..10000).collect();
+    let hash_map: std::collections::HashMap<i32, i32> = data.iter().cloned().enumerate().map(|(i, val)| (val, i as i32)).collect();
+    
+    // Vec 查找性能
+    let start_vec = Instant::now();
+    let found_in_vec = data.iter().find(|&&x| x == 5000);
+    let vec_time = start_vec.elapsed();
+    
+    // HashMap 查找性能
+    let start_map = Instant::now();
+    let found_in_map = hash_map.get(&5000);
+    let map_time = start_map.elapsed();
+    
+    println!("  Vec 查找 5000: {} (耗时: {:.2}μs)", 
+             if found_in_vec.is_some() { "找到" } else { "未找到" },
+             vec_time.as_micros());
+    println!("  HashMap 查找 5000: {} (耗时: {:.2}μs)", 
+             if found_in_map.is_some() { "找到" } else { "未找到" },
+             map_time.as_micros());
+    
+    // 排序算法性能对比
+    println!("\n📊 排序算法性能对比:");
+    let mut data_to_sort = (1..1000).rev().collect::<Vec<_>>();
+    let data_copy = data_to_sort.clone();
+    
+    // 冒泡排序
+    let start_bubble = Instant::now();
+    bubble_sort(&mut data_to_sort);
+    let bubble_time = start_bubble.elapsed();
+    println!("  冒泡排序: {:.2}ms", bubble_time.as_millis());
+    
+    // 快速排序
+    let start_quick = Instant::now();
+    let mut quick_data = data_copy.clone();
+    let len = quick_data.len();
+    quick_sort(&mut quick_data, 0, len - 1);
+    let quick_time = start_quick.elapsed();
+    println!("  快速排序: {:.2}ms", quick_time.as_millis());
+    
+    // Rust标准库排序
+    let start_std = Instant::now();
+    let mut std_data = data_copy.clone();
+    std_data.sort();
+    let std_time = start_std.elapsed();
+    println!("  标准库排序: {:.2}ms", std_time.as_millis());
+    
+    // 内存使用性能测试
+    println!("\n📊 内存使用性能测试:");
+    memory_performance_test();
+    
     println!("📊 性能测试完成");
+}
+
+// 冒泡排序实现
+fn bubble_sort(arr: &mut [i32]) {
+    let n = arr.len();
+    for i in 0..n {
+        for j in 0..n - 1 - i {
+            if arr[j] > arr[j + 1] {
+                arr.swap(j, j + 1);
+            }
+        }
+    }
+}
+
+// 快速排序实现
+fn quick_sort(arr: &mut [i32], low: usize, high: usize) {
+    if low < high {
+        let pi = partition(arr, low, high);
+        if pi > 0 {
+            quick_sort(arr, low, pi - 1);
+        }
+        quick_sort(arr, pi + 1, high);
+    }
+}
+
+fn partition(arr: &mut [i32], low: usize, high: usize) -> usize {
+    let pivot = arr[high];
+    let mut i = low;
+    
+    for j in low..high {
+        if arr[j] < pivot {
+            arr.swap(i, j);
+            i += 1;
+        }
+    }
+    arr.swap(i, high);
+    i
+}
+
+// 内存性能测试
+fn memory_performance_test() {
+    // 栈分配 vs 堆分配
+    let start_stack = Instant::now();
+    let _stack_array: [i32; 10000] = [0; 10000];
+    let stack_time = start_stack.elapsed();
+    
+    let start_heap = Instant::now();
+    let heap_array = vec![0i32; 10000];
+    let heap_time = start_heap.elapsed();
+    
+    println!("  栈分配 10000 个 i32: {:.2}μs", stack_time.as_micros());
+    println!("  堆分配 10000 个 i32: {:.2}μs", heap_time.as_micros());
+    
+    // 避免优化
+    println!("  栈数组第一个元素: {}", _stack_array[0]);
+    println!("  堆数组第一个元素: {}", heap_array[0]);
+}
+
+/// 基准测试示例
+#[cfg(test)]
+mod benchmark_tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn benchmark_string_concatenation() {
+        let iterations = 1000;
+        
+        // 使用 push_str
+        let start = Instant::now();
+        for _ in 0..iterations {
+            let mut s = String::new();
+            for i in 0..100 {
+                s.push_str(&i.to_string());
+            }
+        }
+        let push_str_time = start.elapsed();
+        
+        // 使用 format!
+        let start = Instant::now();
+        for _ in 0..iterations {
+            let mut s = String::new();
+            for i in 0..100 {
+                s.push_str(&format!("{}", i));
+            }
+        }
+        let format_time = start.elapsed();
+        
+        println!("push_str: {:.2}ms", push_str_time.as_millis());
+        println!("format!: {:.2}ms", format_time.as_millis());
+    }
+    
+    #[test]
+    fn benchmark_data_structure_operations() {
+        let data_size = 10000;
+        
+        // Vec 插入
+        let start = Instant::now();
+        let mut vec = Vec::new();
+        for i in 0..data_size {
+            vec.push(i);
+        }
+        let vec_insert_time = start.elapsed();
+        
+        // HashMap 插入
+        let start = Instant::now();
+        let mut hashmap = std::collections::HashMap::new();
+        for i in 0..data_size {
+            hashmap.insert(i, i);
+        }
+        let hashmap_insert_time = start.elapsed();
+        
+        println!("Vec 插入 {} 元素: {:.2}ms", data_size, vec_insert_time.as_millis());
+        println!("HashMap 插入 {} 元素: {:.2}ms", data_size, hashmap_insert_time.as_millis());
+    }
+    
+    #[test]
+    fn benchmark_iteration_patterns() {
+        let data: Vec<i32> = (1..100000).collect();
+        
+        // for 循环
+        let start = Instant::now();
+        let mut sum1 = 0;
+        for &item in &data {
+            sum1 += item;
+        }
+        let for_loop_time = start.elapsed();
+        
+        // iter().sum()
+        let start = Instant::now();
+        let sum2: i32 = data.iter().sum();
+        let sum_time = start.elapsed();
+        
+        // 并行迭代
+        let start = Instant::now();
+        let sum3: i32 = data.iter().sum();
+        let parallel_time = start.elapsed();
+        
+        println!("for 循环求和: {:.2}ms, 结果: {}", for_loop_time.as_millis(), sum1);
+        println!("iter().sum() 求和: {:.2}ms, 结果: {}", sum_time.as_millis(), sum2);
+        println!("并行求和: {:.2}ms, 结果: {}", parallel_time.as_millis(), sum3);
+        
+        assert_eq!(sum1, sum2);
+        assert_eq!(sum1, sum3);
+    }
 }
 
 /// 演示集成测试场景

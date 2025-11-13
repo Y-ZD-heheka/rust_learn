@@ -68,6 +68,11 @@ const MODULE_REGISTRY: &[ModuleInfo] = &[
         run_function: rust_learn::ecosystem::run_ecosystem_examples,
     },
     ModuleInfo {
+        name: "advanced_patterns",
+        description: "进阶设计模式和架构模式",
+        run_function: rust_learn::advanced_patterns::run_all_patterns,
+    },
+    ModuleInfo {
         name: "popular_libraries",
         description: "热门Rust库使用案例(Serde、Clap、Reqwest等)",
         run_function: || {

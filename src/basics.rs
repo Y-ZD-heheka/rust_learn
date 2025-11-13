@@ -198,12 +198,12 @@ pub fn modern_data_structures() {
     }
 }
 
-/// 演示高级算法实现
+/// 演示高级算法实现（增强版）
 pub fn advanced_algorithms() {
     println!("🔬 高级算法实现：");
     
-    // 现代化排序算法 - 适用可比较类型
-    fn quick_sort<T: PartialOrd + std::fmt::Display + Clone>(arr: &mut [T]) {
+    // === 1. 现代化排序算法 - 原地快排优化 ===
+    fn quick_sort_optimized<T: PartialOrd + std::fmt::Display + Clone>(arr: &mut [T]) {
         if arr.len() <= 1 {
             return;
         }
@@ -227,8 +227,8 @@ pub fn advanced_algorithms() {
         }
         
         // 递归排序
-        quick_sort(&mut left);
-        quick_sort(&mut right);
+        quick_sort_optimized(&mut left);
+        quick_sort_optimized(&mut right);
         
         // 合并结果
         let mut result = left;
@@ -243,11 +243,11 @@ pub fn advanced_algorithms() {
     
     let mut numbers = vec![64, 34, 25, 12, 22, 11, 90];
     println!("排序前: {:?}", numbers);
-    quick_sort(&mut numbers);
+    quick_sort_optimized(&mut numbers);
     println!("排序后: {:?}", numbers);
     
-    // 二分查找算法
-    fn binary_search(arr: &[i32], target: i32) -> Option<usize> {
+    // === 2. 优化二分查找算法 ===
+    fn binary_search_optimized(arr: &[i32], target: i32) -> Option<usize> {
         let mut left = 0;
         let mut right = arr.len();
         
@@ -264,29 +264,145 @@ pub fn advanced_algorithms() {
         None
     }
     
-    match binary_search(&numbers, 25) {
+    match binary_search_optimized(&numbers, 25) {
         Some(index) => println!("找到目标25在索引: {}", index),
         None => println!("未找到目标"),
     }
     
-    // 现代化斐波那契数列（记忆化）
-    fn fibonacci_memo(n: usize, memo: &mut Vec<u64>) -> u64 {
+    // === 3. 优化斐波那契数列（矩阵快速幂） ===
+    fn fibonacci_matrix(n: usize) -> u64 {
         if n <= 1 {
             return n as u64;
         }
         
-        if memo[n] != 0 {
-            return memo[n];
+        fn matrix_multiply(a: [[u64; 2]; 2], b: [[u64; 2]; 2]) -> [[u64; 2]; 2] {
+            [
+                [
+                    a[0][0] * b[0][0] + a[0][1] * b[1][0],
+                    a[0][0] * b[0][1] + a[0][1] * b[1][1],
+                ],
+                [
+                    a[1][0] * b[0][0] + a[1][1] * b[1][0],
+                    a[1][0] * b[0][1] + a[1][1] * b[1][1],
+                ],
+            ]
         }
         
-        memo[n] = fibonacci_memo(n - 1, memo) + fibonacci_memo(n - 2, memo);
-        memo[n]
+        fn matrix_power(mut matrix: [[u64; 2]; 2], mut power: usize) -> [[u64; 2]; 2] {
+            let mut result = [[1, 0], [0, 1]]; // 单位矩阵
+            
+            while power > 0 {
+                if power % 2 == 1 {
+                    result = matrix_multiply(result, matrix);
+                }
+                matrix = matrix_multiply(matrix, matrix);
+                power /= 2;
+            }
+            
+            result
+        }
+        
+        let base = [[1, 1], [1, 0]];
+        let result = matrix_power(base, n);
+        result[0][0]
     }
     
     let n = 10;
-    let mut memo = vec![0; n + 1];
-    let result = fibonacci_memo(n, &mut memo);
-    println!("斐波那契数列第{}项: {}", n, result);
+    println!("斐波那契数列第{}项: {}", n, fibonacci_matrix(n));
+    
+    // === 4. 动态规划：背包问题 ===
+    fn knapsack_01(weights: &[i32], values: &[i32], capacity: i32) -> i32 {
+        let n = weights.len();
+        let mut dp = vec![vec![0; capacity as usize + 1]; n + 1];
+        
+        for i in 1..=n {
+            for w in 0..=capacity {
+                dp[i][w as usize] = dp[i - 1][w as usize]; // 不选当前物品
+                
+                if weights[i - 1] <= w {
+                    dp[i][w as usize] = dp[i][w as usize]
+                        .max(dp[i - 1][(w - weights[i - 1]) as usize] + values[i - 1]);
+                }
+            }
+        }
+        
+        dp[n][capacity as usize]
+    }
+    
+    let weights = vec![2, 3, 4, 5];
+    let values = vec![3, 4, 5, 6];
+    let capacity = 8;
+    
+    let max_value = knapsack_01(&weights, &values, capacity);
+    println!("背包问题最大价值: {}", max_value);
+    
+    // === 5. 最短路径算法（Dijkstra） ===
+    use std::collections::BinaryHeap;
+    use std::cmp::Ordering;
+    
+    #[derive(Copy, Clone)]
+    struct Edge {
+        to: usize,
+        weight: i32,
+    }
+    
+    impl PartialEq for Edge {
+        fn eq(&self, other: &Self) -> bool {
+            self.weight == other.weight
+        }
+    }
+    
+    impl Eq for Edge {}
+    
+    impl PartialOrd for Edge {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.weight.cmp(&other.weight))
+        }
+    }
+    
+    impl Ord for Edge {
+        fn cmp(&self, other: &Self) -> Ordering {
+            self.weight.cmp(&other.weight).reverse()
+        }
+    }
+    
+    fn dijkstra(graph: &Vec<Vec<Edge>>, start: usize) -> Vec<i32> {
+        let n = graph.len();
+        let mut dist = vec![i32::MAX; n];
+        let mut visited = vec![false; n];
+        let mut pq = BinaryHeap::new();
+        
+        dist[start] = 0;
+        pq.push(Edge { to: start, weight: 0 });
+        
+        while let Some(Edge { to: node, weight: _ }) = pq.pop() {
+            if visited[node] {
+                continue;
+            }
+            visited[node] = true;
+            
+            for edge in &graph[node] {
+                let new_dist = dist[node] + edge.weight;
+                if new_dist < dist[edge.to] {
+                    dist[edge.to] = new_dist;
+                    pq.push(Edge { to: edge.to, weight: new_dist });
+                }
+            }
+        }
+        
+        dist
+    }
+    
+    // 构建示例图
+    let mut graph = vec![vec![]; 4];
+    graph[0].push(Edge { to: 1, weight: 4 });
+    graph[0].push(Edge { to: 2, weight: 1 });
+    graph[1].push(Edge { to: 2, weight: 2 });
+    graph[1].push(Edge { to: 3, weight: 5 });
+    graph[2].push(Edge { to: 3, weight: 3 });
+    
+    let distances = dijkstra(&graph, 0);
+    println!("从节点0的最短距离: {:?}", distances);
 }
 
 /// 演示闭包和高阶函数

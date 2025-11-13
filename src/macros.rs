@@ -642,6 +642,268 @@ pub fn run_macros_examples() {
     println!("\n✅ 所有宏和元编程示例运行完成！");
 }
 
+/// 演示复杂宏模式匹配
+pub fn complex_macro_patterns() {
+    println!("🎯 复杂宏模式匹配：");
+    
+    // 复杂条件宏
+    macro_rules! match_type {
+        ($val:expr, pattern => $pattern:expr) => {{
+            let value = $val;
+            let pattern = $pattern;
+            match pattern {
+                "string" => {
+                    if let Some(s) = value.downcast_ref::<String>() {
+                        println!("匹配到字符串: {}", s);
+                        true
+                    } else {
+                        false
+                    }
+                },
+                "number" => {
+                    if let Some(n) = value.downcast_ref::<i32>() {
+                        println!("匹配到数字: {}", n);
+                        true
+                    } else {
+                        false
+                    }
+                },
+                _ => {
+                    println!("未知的模式类型: {}", pattern);
+                    false
+                }
+            }
+        }};
+    }
+    
+    // 使用类型匹配宏
+    let string_value: Box<dyn std::any::Any> = Box::new("Hello".to_string());
+    let number_value: Box<dyn std::any::Any> = Box::new(42);
+    
+    println!("字符串匹配:");
+    let _ = match_type!(string_value, pattern => "string");
+    println!("数字匹配:");
+    let _ = match_type!(number_value, pattern => "number");
+    
+    // 简化的嵌套向量宏
+    macro_rules! nested_vec {
+        ($($val:expr),+ $(,)?) => {
+            {
+                let mut temp_vec = Vec::new();
+                $(
+                    temp_vec.push($val);
+                )+
+                temp_vec
+            }
+        };
+    }
+    
+    // 使用嵌套向量宏
+    println!("\n嵌套向量示例:");
+    let flat = nested_vec![1, 2, 3, 4];
+    println!("平面向量: {:?}", flat);
+    
+    // 模式识别宏
+    macro_rules! identify_pattern {
+        (all_even: [$($num:expr),* $(,)?]) => {
+            {
+                let mut all_even = true;
+                $(
+                    if $num % 2 != 0 {
+                        all_even = false;
+                    }
+                )*
+                all_even
+            }
+        };
+        (sum_greater_than: [$($num:expr),* $(,)?], $threshold:expr) => {
+            {
+                let sum: i32 = $($num +)* 0;
+                sum > $threshold
+            }
+        };
+        (contains: [$($num:expr),* $(,)?], $target:expr) => {
+            {
+                let mut found = false;
+                $(
+                    if $num == $target {
+                        found = true;
+                    }
+                )*
+                found
+            }
+        };
+    }
+    
+    println!("\n模式识别示例:");
+    println!("都是偶数: {}", identify_pattern!(all_even: [2, 4, 6]));
+    println!("和大于30: {}", identify_pattern!(sum_greater_than: [5, 10, 20], 30));
+    println!("包含6: {}", identify_pattern!(contains: [1, 2, 3, 6], 6));
+}
+
+/// 演示内联函数宏
+pub fn inline_function_macros() {
+    println!("⚡ 内联函数宏：");
+    
+    // 类似函数的内联宏
+    macro_rules! safe_divide {
+        ($a:expr, $b:expr) => {
+            if $b == 0 {
+                println!("⚠️ 警告：除零错误");
+                0
+            } else {
+                $a / $b
+            }
+        };
+        ($a:expr, $b:expr, fallback: $fallback:expr) => {
+            if $b == 0 {
+                println!("⚠️ 警告：除零错误，使用回退值");
+                $fallback
+            } else {
+                $a / $b
+            }
+        };
+    }
+    
+    println!("安全除法示例:");
+    println!("10 / 2 = {}", safe_divide!(10, 2));
+    println!("10 / 0 = {}", safe_divide!(10, 0));
+    println!("10 / 0 (回退=99) = {}", safe_divide!(10, 0, fallback: 99));
+    
+    // 缓存宏
+    macro_rules! memoized_fibonacci {
+        ($n:expr) => {{
+            fn fib(n: u32) -> u64 {
+                if n <= 1 {
+                    n as u64
+                } else {
+                    fib(n - 1) + fib(n - 2)
+                }
+            }
+            fib($n)
+        }};
+    }
+    
+    println!("\n斐波那契计算:");
+    println!("fib(10) = {}", memoized_fibonacci!(10));
+    
+    // 简化状态机宏
+    #[derive(Debug)]
+    enum SimpleState {
+        Idle,
+        Processing,
+        Completed,
+    }
+    
+    macro_rules! simple_state_machine {
+        ($initial:ident) => {
+            SimpleState::$initial
+        };
+    }
+    
+    // 使用简化状态机宏
+    println!("\n状态机示例:");
+    let current = simple_state_machine!(Idle);
+    println!("初始状态: {:?}", current);
+}
+
+/// 演示宏调试技术
+pub fn macro_debugging_techniques() {
+    println!("🐛 宏调试技术：");
+    
+    // 使用 stringified! 进行调试
+    macro_rules! debug_macro {
+        ($($arg:tt)*) => {
+            {
+                println!("🐛 宏调用: {}", stringify!($($arg)*));
+                println!("🐛 实际参数: {:?}", ($($arg)*));
+                $($arg)*
+            }
+        };
+    }
+    
+    println!("调试宏示例:");
+    let result = debug_macro!(2 + 3 * 4);
+    println!("计算结果: {}", result);
+    
+    // 调试信息宏
+    macro_rules! log_operation {
+        (operation: $op:expr, input: $input:expr, output: $output:expr) => {
+            println!("🔍 {} - 输入: {:?} -> 输出: {:?}", 
+                     stringify!($op), $input, $output);
+        };
+    }
+    
+    let data = vec![1, 2, 3, 4, 5];
+    let filtered: Vec<_> = data.iter().filter(|&&x| x % 2 == 0).collect();
+    log_operation!(operation: filter, input: data, output: filtered);
+    
+    // 宏展开跟踪
+    macro_rules! trace_expansion {
+        ($expr:expr) => {
+            {
+                println!("📍 正在展开: {}", stringify!($expr));
+                let result = $expr;
+                println!("📍 展开结果: {:?}", result);
+                result
+            }
+        };
+    }
+    
+    println!("\n宏展开跟踪:");
+    let doubled: Vec<_> = trace_expansion!(vec![1, 2, 3].iter().map(|x| x * 2).collect());
+    println!("最终结果: {:?}", doubled);
+}
+
+/// 演示高级DSL构建器
+pub fn advanced_dsl_builders() {
+    println!("🏗️ 高级DSL构建器：");
+    
+    // 简化的SQL查询构建器DSL
+    macro_rules! simple_sql_select {
+        (SELECT $( $field:ident ),* FROM $table:ident) => {
+            {
+                format!("SELECT {} FROM {}", stringify!($( $field ),*), stringify!($table))
+            }
+        };
+    }
+    
+    println!("SQL查询DSL示例:");
+    let simple_query = simple_sql_select!(SELECT name, age FROM users);
+    println!("简单查询: {}", simple_query);
+    
+    // 简化的配置构建示例
+    println!("\n配置构建示例:");
+    let mut config = std::collections::HashMap::new();
+    config.insert("host".to_string(), "localhost".to_string());
+    config.insert("port".to_string(), "8080".to_string());
+    config.insert("debug".to_string(), "true".to_string());
+    
+    println!("构建的配置:");
+    for (key, value) in &config {
+        println!("  {}: {}", key, value);
+    }
+    
+    // 简化的流式API DSL
+    macro_rules! simple_stream_api {
+        ($source:expr, filter: $filter:expr) => {
+            {
+                $source.filter($filter).collect::<Vec<_>>()
+            }
+        };
+        ($source:expr, map: $map:expr) => {
+            {
+                $source.map($map).collect::<Vec<_>>()
+            }
+        };
+    }
+    
+    println!("\n流式APIDSL示例:");
+    let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let result: Vec<_> = simple_stream_api!(numbers.into_iter(), filter: |&x| x % 2 == 0);
+    println!("流式处理结果: {:?}", result);
+}
+
 /// 运行宏和DSL示例
 pub fn run_macro_dsl_examples() {
     println!("🎯 === 现代化宏和DSL示例 ===");
@@ -663,4 +925,27 @@ pub fn run_macro_dsl_examples() {
     api_routing_dsl();
     
     println!("\n✅ 所有宏和DSL示例运行完成！");
+}
+
+/// 运行高级宏示例
+pub fn run_advanced_macro_examples() {
+    println!("🎯 === 高级宏和元编程示例 ===");
+    println!();
+    
+    println!("=== 复杂宏模式匹配 ===");
+    complex_macro_patterns();
+    println!();
+    
+    println!("=== 内联函数宏 ===");
+    inline_function_macros();
+    println!();
+    
+    println!("=== 宏调试技术 ===");
+    macro_debugging_techniques();
+    println!();
+    
+    println!("=== 高级DSL构建器 ===");
+    advanced_dsl_builders();
+    
+    println!("\n✅ 所有高级宏示例运行完成！");
 }
