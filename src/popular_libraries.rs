@@ -414,3 +414,113 @@ async fn demonstrate_http_requests_with_url(url: &str) -> Result<()> {
     
     Ok(())
 }
+
+/// 演示所有库的完整示例
+pub fn run_popular_libraries_examples() {
+    println!("🎯 === Rust热门库完整演示 ===");
+    println!();
+    
+    // 1. Serde序列化/反序列化
+    println!("════════════════════════════════════════");
+    println!("1️⃣ Serde - 数据序列化");
+    println!("════════════════════════════════════════");
+    if let Err(e) = demonstrate_serde_serialization() {
+        eprintln!("❌ Serde演示错误: {}", e);
+    }
+    
+    println!("\n");
+    
+    // 2. 错误处理示例
+    println!("════════════════════════════════════════");
+    println!("2️⃣ Anyhow & Thiserror - 错误处理");
+    println!("════════════════════════════════════════");
+    if let Err(e) = demonstrate_error_handling() {
+        println!("📝 捕获的错误: {}", e);
+    }
+    
+    println!("\n");
+    
+    // 3. 日期时间和UUID
+    println!("════════════════════════════════════════");
+    println!("3️⃣ Chrono & UUID - 时间和标识符");
+    println!("════════════════════════════════════════");
+    demonstrate_datetime_uuid();
+    
+    println!("\n");
+    
+    // 4. JSON处理
+    println!("════════════════════════════════════════");
+    println!("4️⃣ Serde_json - JSON处理示例");
+    println!("════════════════════════════════════════");
+    demonstrate_json_processing();
+    
+    println!("\n");
+    
+    // 5. CLI参数示例
+    println!("════════════════════════════════════════");
+    println!("5️⃣ Clap - 命令行参数解析");
+    println!("════════════════════════════════════════");
+    let example_args = CliArgs {
+        operation: Operation::Serialize,
+        verbose: true,
+        url: Some("https://example.com".to_string()),
+    };
+    demonstrate_cli_parsing(&example_args);
+    
+    println!("\n");
+    
+    // 6. 日志系统
+    println!("════════════════════════════════════════");
+    println!("6️⃣ Tracing - 日志和追踪");
+    println!("════════════════════════════════════════");
+    demonstrate_tracing();
+    
+    println!("\n✅ 所有热门库示例演示完成！");
+}
+
+/// 演示JSON处理
+fn demonstrate_json_processing() {
+    println!("📋 演示JSON处理:");
+    
+    // 创建复杂JSON对象
+    let user_list = json!([
+        {
+            "id": 1,
+            "name": "张三",
+            "age": 28,
+            "skills": ["Rust", "Go", "Python"],
+            "active": true
+        },
+        {
+            "id": 2,
+            "name": "李四",
+            "age": 32,
+            "skills": ["Java", "C++", "C#"],
+            "active": false
+        }
+    ]);
+    
+    println!("📝 原始JSON:");
+    println!("{}", serde_json::to_string_pretty(&user_list).unwrap());
+    
+    // 访问JSON数据
+    if let Some(arr) = user_list.as_array() {
+        println!("\n👥 用户列表访问:");
+        for (idx, user) in arr.iter().enumerate() {
+            if let Some(name) = user.get("name").and_then(|v| v.as_str()) {
+                if let Some(age) = user.get("age").and_then(|v| v.as_u64()) {
+                    println!("  [{}] {} - 年龄: {}", idx + 1, name, age);
+                }
+            }
+        }
+    }
+    
+    // JSON修改
+    let mut modified_json = user_list.clone();
+    if let Some(obj) = modified_json.get_mut(0).and_then(|v| v.as_object_mut()) {
+        obj.insert("status".to_string(), json!("升级"));
+    }
+    
+    println!("\n✏️ 修改后的JSON:");
+    println!("{}", serde_json::to_string_pretty(&modified_json).unwrap());
+}
