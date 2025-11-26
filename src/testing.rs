@@ -464,9 +464,20 @@ pub fn property_based_testing_basics() {
     ];
     
     for (data, desc) in arithmetic_tests {
-        let result = match data {
-            (a, b) => addition_commutative(a, b),
-            (a, b) => addition_associative(a, b, 0), // 第三个参数占位符
+        let result = match desc {
+            "交换律" => {
+                let (a, b) = data;
+                addition_commutative(a, b)
+            },
+            "结合律" => {
+                let (a, b) = data;
+                addition_associative(a, b, 0) // 第三个参数占位符
+            },
+            "分配律" => {
+                let (a, b) = data;
+                multiplication_distributive(a, b, 0) // 第三个参数占位符
+            },
+            _ => false,
         };
         println!("    {}: {}", desc, if result { "✅ 通过" } else { "❌ 失败" });
     }
@@ -493,7 +504,7 @@ pub fn property_based_testing_basics() {
 pub fn performance_testing_examples() {
     println!("⚡ 性能测试和基准测试：");
     
-    use std::time::{Duration, Instant};
+    use std::time::Instant;
     
     // 大数据集性能测试
     let large_dataset: Vec<i32> = (1..100000).collect();
@@ -645,7 +656,6 @@ fn memory_performance_test() {
 #[cfg(test)]
 mod benchmark_tests {
     use super::*;
-    use std::time::{Duration, Instant};
 
     #[test]
     fn benchmark_string_concatenation() {

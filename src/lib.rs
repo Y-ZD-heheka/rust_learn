@@ -15,3 +15,7 @@ pub mod testing;
 pub mod popular_libraries;
 pub mod ecosystem;
 pub mod advanced_patterns;
+pub mod security;
+pub mod best_practices;
+pub mod pitfalls;
+// pub mod database; // 暂时禁用数据库模块以解决编译问题
