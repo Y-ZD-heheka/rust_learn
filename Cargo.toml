@@ -13,8 +13,8 @@ clap = { version = "4.5.53", features = ["derive"] }
 reqwest = { version = "0.12.24", features = ["json"] }
 anyhow = "1.0.100"
 thiserror = "2.0.17"
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+tracing = "0.1.42"
+tracing-subscriber = { version = "0.3.21", features = ["env-filter"] }
 chrono = { version = "0.4.42", features = ["serde"] }
 uuid = { version = "1.18.1", features = ["v4", "serde"] }
 
@@ -26,7 +26,7 @@ hmac = "0.12.1"
 subtle = "2.6.1"
 
 # 数据库相关
-sqlx = { version = "0.8.0", features = ["runtime-tokio-rustls", "chrono", "uuid", "postgres", "sqlite"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "chrono", "uuid", "postgres", "sqlite"] }
 
 # 加密和安全
 base64 = "0.22.1"
