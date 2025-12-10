@@ -87,8 +87,8 @@ mod tests {
             "张三".to_string(),
             "zhangsan@example.com".to_string(),
             25
-        ).unwrap();
-        
+        ).expect("Failed to create user for test");
+
         assert_eq!(user.name, "张三");
         assert_eq!(user.email, "zhangsan@example.com");
         assert_eq!(user.age, 25);
@@ -125,8 +125,8 @@ mod tests {
             "王五".to_string(),
             "wangwu@example.com".to_string(),
             30
-        ).unwrap();
-        
+        ).expect("Failed to create user for test");
+
         assert!(user.is_adult());
         assert_eq!(user.greet(), "你好，王五！");
     }
@@ -266,9 +266,9 @@ mod performance_tests {
                 format!("用户{}", i),
                 format!("user{}@example.com", i),
                 20 + (i % 50) as u8
-            ).unwrap();
-            
-            manager.add_user(user).unwrap();
+            ).expect("Failed to create user in performance test");
+
+            manager.add_user(user).expect("Failed to add user");
         }
         
         assert_eq!(manager.user_count(), 1000);
@@ -365,7 +365,7 @@ pub fn enterprise_testing_strategies() {
     assert_eq!(calc.add(2.0, 3.0), 5.0);
     assert_eq!(calc.subtract(10.0, 4.0), 6.0);
     assert_eq!(calc.multiply(3.0, 4.0), 12.0);
-    assert_eq!(calc.divide(15.0, 3.0).unwrap(), 5.0);
+    assert_eq!(calc.divide(15.0, 3.0).expect("Division should succeed"), 5.0);
     
     println!("✅ 基础运算测试通过");
     
@@ -524,12 +524,14 @@ pub fn performance_testing_examples() {
     // 字符串操作性能测试
     fn string_operations_performance() {
         let start = Instant::now();
-        
-        let mut result = String::new();
+
+        let mut result = String::with_capacity(10000 * 7); // 预分配足够空间
         for i in 0..10000 {
-            result.push_str(&format!("Item {} ", i));
+            result.push_str("Item ");
+            result.push_str(&i.to_string());
+            result.push(' ');
         }
-        
+
         let processing_time = start.elapsed();
         println!("📈 字符串操作性能:");
         println!("  操作次数: 10000");
@@ -660,27 +662,27 @@ mod benchmark_tests {
     #[test]
     fn benchmark_string_concatenation() {
         let iterations = 1000;
-        
+
         // 使用 push_str
         let start = Instant::now();
         for _ in 0..iterations {
-            let mut s = String::new();
+            let mut s = String::with_capacity(300); // 预分配空间
             for i in 0..100 {
                 s.push_str(&i.to_string());
             }
         }
         let push_str_time = start.elapsed();
-        
+
         // 使用 format!
         let start = Instant::now();
         for _ in 0..iterations {
-            let mut s = String::new();
+            let mut s = String::with_capacity(300); // 预分配空间
             for i in 0..100 {
-                s.push_str(&format!("{}", i));
+                s.push_str(&i.to_string());
             }
         }
         let format_time = start.elapsed();
-        
+
         println!("push_str: {:.2}ms", push_str_time.as_millis());
         println!("format!: {:.2}ms", format_time.as_millis());
     }
@@ -926,7 +928,7 @@ pub fn test_driven_development_example() {
     assert_eq!(calc.multiply(3.0, 4.0), 12.0);
     println!("✅ 乘法测试通过");
     
-    assert_eq!(calc.divide(15.0, 3.0).unwrap(), 5.0);
+    assert_eq!(calc.divide(15.0, 3.0).expect("Division should succeed"), 5.0);
     println!("✅ 除法测试通过");
     
     // 测试错误情况
@@ -1071,7 +1073,7 @@ pub fn run_testing_examples() {
         25
     ) {
         Ok(user) => {
-            manager.add_user(user).unwrap();
+            manager.add_user(user).expect("Failed to add user");
             println!("✅ 用户添加成功");
         }
         Err(e) => println!("❌ 用户创建失败: {}", e),
@@ -1083,7 +1085,7 @@ pub fn run_testing_examples() {
         25
     ) {
         Ok(user) => {
-            manager.add_user(user).unwrap();
+            manager.add_user(user).expect("Failed to add user");
             println!("✅ 用户添加成功");
         }
         Err(e) => println!("❌ 用户创建失败: {}", e),

@@ -123,7 +123,7 @@ pub fn modern_question_mark_patterns() {
     
     // 创建测试文件
     let test_content = "Test content for reading";
-    std::fs::write("test_file.txt", test_content).unwrap();
+    std::fs::write("test_file.txt", test_content).expect("Failed to create test file");
     
     fn read_file_content(path: &str) -> Result<String, io::Error> {
         let mut file = File::open(path)?;
@@ -779,7 +779,7 @@ pub fn resource_loading_error_handling() {
 /// 演示第三方服务错误处理
 pub fn external_service_error_handling() {
     println!("🔌 第三方服务错误处理：");
-    
+
     #[derive(Debug)]
     enum ServiceError {
         RateLimitExceeded { service: String, retry_after: u32 },
@@ -788,7 +788,7 @@ pub fn external_service_error_handling() {
         QuotaExceeded { service: String },
         ServiceError { service: String, message: String },
     }
-    
+
     impl fmt::Display for ServiceError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
@@ -810,7 +810,7 @@ pub fn external_service_error_handling() {
             }
         }
     }
-    
+
     // 模拟第三方服务调用
     #[derive(Debug, Clone)]
     enum Service {
@@ -819,7 +819,7 @@ pub fn external_service_error_handling() {
         SmsService,
         Analytics,
     }
-    
+
     fn call_external_service(service: Service, request_data: &str) -> Result<String, ServiceError> {
         match service {
             Service::PaymentGateway => match request_data {
@@ -833,7 +833,7 @@ pub fn external_service_error_handling() {
                 }),
                 _ => Ok("支付处理成功".to_string()),
             },
-            
+
             Service::EmailService => {
                 if request_data == "rate_limit" {
                     Err(ServiceError::RateLimitExceeded {
@@ -844,7 +844,7 @@ pub fn external_service_error_handling() {
                     Ok("邮件发送成功".to_string())
                 }
             },
-            
+
             Service::SmsService => {
                 if request_data == "unauthorized" {
                     Err(ServiceError::AuthenticationFailed {
@@ -858,7 +858,7 @@ pub fn external_service_error_handling() {
                     Ok("短信发送成功".to_string())
                 }
             },
-            
+
             Service::Analytics => {
                 if request_data == "maintenance" {
                     Err(ServiceError::ServiceUnavailable {
@@ -870,7 +870,71 @@ pub fn external_service_error_handling() {
             },
         }
     }
-    
+
+    fn handle_service_error(service_name: &str, error: ServiceError) {
+        println!("❌ 错误: {}", error);
+
+        // 根据错误类型实施不同的恢复策略
+        match error {
+            ServiceError::RateLimitExceeded { retry_after, .. } => {
+                println!("🔄 等待 {} 秒后重试", retry_after);
+                // 在实际应用中这里会实现退避重试算法
+            },
+            ServiceError::AuthenticationFailed { .. } => {
+                println!("🔄 刷新认证令牌并重试");
+                // 更新API密钥或token
+            },
+            ServiceError::ServiceUnavailable { .. } => {
+                println!("🔄 切换到备用服务");
+                // 故障转移到备用服务商
+            },
+            ServiceError::QuotaExceeded { .. } => {
+                println!("🔄 延迟处理，等待配额重置");
+                // 将请求排入队列
+            },
+            ServiceError::ServiceError { message, .. } => {
+                handle_payment_error(service_name, &message);
+            }
+        }
+    }
+
+    fn handle_payment_error(service_name: &str, message: &str) {
+        match message {
+            "余额不足" => {
+                println!("🔄 提示用户充值");
+                // 向用户发送充值提醒
+            },
+            "信用卡已过期" => {
+                println!("🔄 提示用户更新支付信息");
+                // 要求用户更新信用卡信息
+            },
+            _ => {
+                println!("🔄 记录错误并人工处理");
+                // 记录到错误跟踪系统
+            }
+        }
+    }
+
+    fn get_service_name(service: &Service) -> &'static str {
+        match service {
+            Service::PaymentGateway => "支付网关",
+            Service::EmailService => "邮件服务",
+            Service::SmsService => "短信服务",
+            Service::Analytics => "分析服务",
+        }
+    }
+
+    fn process_service_call(service: Service, data: &str) {
+        let service_name = get_service_name(&service);
+        println!("调用 {}: {}", service_name, data);
+
+        match call_external_service(service, data) {
+            Ok(result) => println!("✅ 成功: {}", result),
+            Err(e) => handle_service_error(service_name, e),
+        }
+        println!();
+    }
+
     // 测试各种服务调用场景
     let test_cases = vec![
         (Service::PaymentGateway, "expired_card"),
@@ -883,62 +947,9 @@ pub fn external_service_error_handling() {
         (Service::Analytics, "maintenance"),
         (Service::Analytics, "normal_event"),
     ];
-    
+
     for (service, data) in test_cases.iter() {
-        let service_name = match service {
-            Service::PaymentGateway => "支付网关",
-            Service::EmailService => "邮件服务",
-            Service::SmsService => "短信服务",
-            Service::Analytics => "分析服务",
-        };
-        
-        println!("调用 {}: {}", service_name, data);
-        
-        // 使用clone来解决移动问题
-        let service_clone = service.clone();
-        match call_external_service(service_clone, data) {
-            Ok(result) => println!("✅ 成功: {}", result),
-            Err(e) => {
-                println!("❌ 错误: {}", e);
-                
-                // 根据错误类型实施不同的恢复策略
-                match e {
-                    ServiceError::RateLimitExceeded { retry_after, .. } => {
-                        println!("🔄 等待 {} 秒后重试", retry_after);
-                        // 在实际应用中这里会实现退避重试算法
-                    },
-                    ServiceError::AuthenticationFailed { .. } => {
-                        println!("🔄 刷新认证令牌并重试");
-                        // 更新API密钥或token
-                    },
-                    ServiceError::ServiceUnavailable { .. } => {
-                        println!("🔄 切换到备用服务");
-                        // 故障转移到备用服务商
-                    },
-                    ServiceError::QuotaExceeded { .. } => {
-                        println!("🔄 延迟处理，等待配额重置");
-                        // 将请求排入队列
-                    },
-                    ServiceError::ServiceError { message, .. } => {
-                        match message.as_str() {
-                            "余额不足" => {
-                                println!("🔄 提示用户充值");
-                                // 向用户发送充值提醒
-                            },
-                            "信用卡已过期" => {
-                                println!("🔄 提示用户更新支付信息");
-                                // 要求用户更新信用卡信息
-                            },
-                            _ => {
-                                println!("🔄 记录错误并人工处理");
-                                // 记录到错误跟踪系统
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        println!();
+        process_service_call(service.clone(), data);
     }
 }
 

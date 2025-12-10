@@ -199,46 +199,65 @@ pub fn modern_data_structures() {
 }
 
 /// 演示高级算法实现（增强版）
+///
+/// 这个函数展示了多种高级算法的实现，包括：
+/// - 原地快速排序（优化版）
+/// - 二分查找
+/// - 斐波那契数列（矩阵快速幂）
+/// - 背包问题（动态规划）
+/// - 最短路径算法（Dijkstra）
 pub fn advanced_algorithms() {
     println!("🔬 高级算法实现：");
     
-    // === 1. 现代化排序算法 - 原地快排优化 ===
-    fn quick_sort_optimized<T: PartialOrd + std::fmt::Display + Clone>(arr: &mut [T]) {
+    /// 原地快速排序算法（优化版）
+    ///
+    /// 这个函数实现了原地快速排序算法，使用Lomuto分区方案。
+    /// 与原始实现相比，这个版本减少了不必要的内存分配和克隆操作。
+    ///
+    /// # 参数
+    /// - `arr`: 要排序的可变切片
+    ///
+    /// # 示例
+    /// ```
+    /// let mut numbers = vec![64, 34, 25, 12, 22, 11, 90];
+    /// quick_sort_optimized(&mut numbers);
+    /// assert_eq!(numbers, vec![11, 12, 22, 25, 34, 64, 90]);
+    /// ```
+    fn quick_sort_optimized<T: PartialOrd + std::fmt::Display>(arr: &mut [T]) {
         if arr.len() <= 1 {
             return;
         }
-        
-        let pivot = arr.len() / 2;
-        let pivot_value = arr[pivot].clone();
-        
-        let mut left = Vec::new();
-        let mut right = Vec::new();
-        
-        for (i, item) in arr.iter().enumerate() {
-            if i == pivot {
-                continue;
-            }
-            
-            if item < &pivot_value {
-                left.push(item.clone());
-            } else {
-                right.push(item.clone());
+
+        let pivot = partition(arr);
+        quick_sort_optimized(&mut arr[..pivot]);
+        quick_sort_optimized(&mut arr[pivot + 1..]);
+    }
+
+    /// Lomuto分区方案
+    ///
+    /// 这个函数用于快速排序算法中的分区操作。
+    /// 它选择最后一个元素作为枢轴，并将数组重新排列，
+    /// 使得所有小于枢轴的元素都在枢轴左侧，所有大于枢轴的元素都在枢轴右侧。
+    ///
+    /// # 参数
+    /// - `arr`: 要分区的可变切片
+    ///
+    /// # 返回值
+    /// 枢轴的最终索引位置
+    fn partition<T: PartialOrd>(arr: &mut [T]) -> usize {
+        let pivot_index = arr.len() / 2;
+        arr.swap(pivot_index, arr.len() - 1);
+
+        let mut i = 0;
+        for j in 0..arr.len() - 1 {
+            if arr[j] < arr[arr.len() - 1] {
+                arr.swap(i, j);
+                i += 1;
             }
         }
-        
-        // 递归排序
-        quick_sort_optimized(&mut left);
-        quick_sort_optimized(&mut right);
-        
-        // 合并结果
-        let mut result = left;
-        result.push(pivot_value);
-        result.extend(right);
-        
-        // 复制回原数组
-        for (i, item) in result.iter().enumerate() {
-            arr[i] = item.clone();
-        }
+
+        arr.swap(i, arr.len() - 1);
+        i
     }
     
     let mut numbers = vec![64, 34, 25, 12, 22, 11, 90];
@@ -492,9 +511,8 @@ pub fn file_operations() {
     }
     
     // 检查文件是否存在
-    if fs::metadata(test_file).is_ok() {
+    if let Ok(metadata) = fs::metadata(test_file) {
         println!("📊 文件信息:");
-        let metadata = fs::metadata(test_file).unwrap();
         println!("  大小: {} 字节", metadata.len());
         println!("  权限: {:?}", metadata.permissions());
     }

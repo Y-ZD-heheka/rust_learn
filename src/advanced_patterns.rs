@@ -7,9 +7,10 @@ use std::fmt;
 
 // ============== Builder 模式 ==============
 
-/// 数据库连接配置构建器 - 演示Builder模式
+/// 数据库连接配置
+///
+/// 这个结构体表示数据库连接的配置信息，包括主机、端口、数据库名等。
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct DatabaseConfig {
     host: String,
     port: u16,
@@ -437,46 +438,74 @@ impl Coffee for SimpleCoffee {
     }
 }
 
-/// 咖啡装饰器
+/// 咖啡装饰器 - 牛奶
 #[derive(Debug)]
 pub struct CoffeeWithMilk {
-    coffee: Box<dyn Coffee>,
+    inner_coffee: Box<dyn Coffee>,
 }
 
 impl CoffeeWithMilk {
-    pub fn new(coffee: Box<dyn Coffee>) -> Self {
-        Self { coffee }
+    pub fn new(base_coffee: Box<dyn Coffee>) -> Self {
+        Self { inner_coffee: base_coffee }
     }
 }
 
 impl Coffee for CoffeeWithMilk {
     fn description(&self) -> String {
-        format!("{} + Milk", self.coffee.description())
+        format!("{} with Milk", self.inner_coffee.description())
     }
 
     fn cost(&self) -> f64 {
-        self.coffee.cost() + 0.5
+        self.inner_coffee.cost() + 0.5
     }
 }
 
+/// 咖啡装饰器 - 糖
 #[derive(Debug)]
 pub struct CoffeeWithSugar {
-    coffee: Box<dyn Coffee>,
+    inner_coffee: Box<dyn Coffee>,
 }
 
 impl CoffeeWithSugar {
-    pub fn new(coffee: Box<dyn Coffee>) -> Self {
-        Self { coffee }
+    pub fn new(base_coffee: Box<dyn Coffee>) -> Self {
+        Self { inner_coffee: base_coffee }
     }
 }
 
 impl Coffee for CoffeeWithSugar {
     fn description(&self) -> String {
-        format!("{} + Sugar", self.coffee.description())
+        format!("{} with Sugar", self.inner_coffee.description())
     }
 
     fn cost(&self) -> f64 {
-        self.coffee.cost() + 0.3
+        self.inner_coffee.cost() + 0.3
+    }
+}
+
+/// 咖啡构建器 - 提供流畅的API来创建咖啡
+pub struct CoffeeBuilder {
+    base_coffee: Box<dyn Coffee>,
+}
+
+impl CoffeeBuilder {
+    pub fn new() -> Self {
+        Self {
+            base_coffee: Box::new(SimpleCoffee),
+        }
+    }
+
+    pub fn with_milk(mut self) -> Self {
+        self.base_coffee = Box::new(CoffeeWithMilk::new(self.base_coffee));
+        self
+    }
+
+    pub fn with_sugar(mut self) -> Self {
+        self.base_coffee = Box::new(CoffeeWithSugar::new(self.base_coffee));
+        self
+    }
+
+    pub fn build(self) -> Box<dyn Coffee> {
+        self.base_coffee
     }
 }
 
@@ -565,22 +594,47 @@ fn demo_factory() {
 /// 演示Decorator模式
 fn demo_decorator() {
     println!("\n🎁 === Decorator 模式演示 ===");
-    
+
+    // 使用传统装饰器模式
     let simple: Box<dyn Coffee> = Box::new(SimpleCoffee);
     println!("Simple: {} - ${:.2}", simple.description(), simple.cost());
-    
+
     let with_milk: Box<dyn Coffee> = Box::new(CoffeeWithMilk::new(Box::new(SimpleCoffee)));
     println!("With Milk: {} - ${:.2}", with_milk.description(), with_milk.cost());
-    
-    let fancy: Box<dyn Coffee> = Box::new(
-        CoffeeWithSugar::new(
-            Box::new(CoffeeWithMilk::new(Box::new(SimpleCoffee)))
-        )
-    );
-    println!("Fancy: {} - ${:.2}", fancy.description(), fancy.cost());
+
+    // 使用构建器模式创建复杂咖啡
+    let fancy_coffee = CoffeeBuilder::new()
+        .with_milk()
+        .with_sugar()
+        .build();
+
+    println!("Fancy (Builder): {} - ${:.2}", fancy_coffee.description(), fancy_coffee.cost());
+
+    // 更复杂的例子
+    let complex_coffee = CoffeeBuilder::new()
+        .with_sugar()
+        .with_milk()
+        .with_sugar() // 双份糖
+        .build();
+
+    println!("Complex: {} - ${:.2}", complex_coffee.description(), complex_coffee.cost());
 }
 
-/// 运行所有进阶模式示例
+/// 运行所有进阶设计模式示例
+///
+/// 这个函数演示了多种设计模式的实现，包括：
+/// - Builder模式：流畅的对象构建API
+/// - Strategy模式：可互换的算法家族
+/// - Observer模式：发布-订阅机制
+/// - State模式：对象状态转换
+/// - Factory模式：对象创建工厂
+/// - Decorator模式：动态添加行为
+///
+/// # 示例
+/// ```
+/// use rust_learn::advanced_patterns::run_all_patterns;
+/// run_all_patterns();
+/// ```
 pub fn run_all_patterns() {
     println!("🎯 === 进阶设计模式和架构示例 ===");
     println!();
