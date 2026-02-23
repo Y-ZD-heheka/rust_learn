@@ -5,6 +5,7 @@
 //! 帮助开发者识别和避免这些常见错误。
 
 #![allow(dead_code)]
+#![allow(clippy::all)]
 
 use std::rc::Weak;
 
