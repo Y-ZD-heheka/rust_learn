@@ -426,6 +426,7 @@ cargo test --all
 - [Rust Reference](https://doc.rust-lang.org/reference/) - 语言参考
 
 ### 学习资源
+- [course](https://course.rs/) - 墙裂推荐的中文学习教程
 - [Rustlings](https://github.com/rust-lang/rustlings) - 交互式教程
 - [Exercism Rust Track](https://exercism.org/tracks/rust) - 编程练习
 - [Rust Design Patterns](https://rust-lang.github.io/api-guidelines/) - 设计指南
