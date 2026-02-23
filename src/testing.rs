@@ -408,6 +408,7 @@ pub fn property_based_testing_basics() {
     }
 
     // 属性测试：交换律
+    #[allow(clippy::eq_op)]
     fn addition_commutative(a: i32, b: i32) -> bool {
         a + b == b + a
     }

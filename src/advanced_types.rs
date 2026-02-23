@@ -299,7 +299,7 @@ pub fn modern_generic_constraints() {
         T: Clone + Display + PartialEq,
     {
         format!("处理项目: {} (克隆: {}, 相等: {})",
-                item, item.clone(), item == item)
+                item, item.clone(), true)
     }
     
     let text = "Hello Rust";

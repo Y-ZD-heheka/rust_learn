@@ -183,7 +183,7 @@ pub fn modern_procedural_macros_demo() {
     println!("点2: {}", p2);
     println!("点1 Debug: {:?}", p1);
     println!("点2 Clone: {:?}", p2.clone());
-    println!("相等检查: {}", p1 == p1);
+    println!("相等检查: {}", p1 == p2);
 
     // 使用宏创建点
     let p3 = create_point!(x: 10.0, y: 20.0);

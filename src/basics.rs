@@ -19,7 +19,7 @@ pub fn variables_and_types() {
 
     // 使用更明确的类型声明
     let integer: i32 = 42;
-    let float: f64 = 3.14159;
+    let float: f64 = std::f64::consts::PI;
     let boolean: bool = true;
     let character: char = 'R';
     let string_slice: &str = "Hello, Rust!";
