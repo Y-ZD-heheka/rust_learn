@@ -105,8 +105,8 @@ pub fn slices() {
     let even_numbers: Vec<_> = arr
         .iter()
         .enumerate()
-        .filter(|(_i, &x)| x % 2 == 0)
-        .map(|(i, &x)| (i, x))
+        .filter(|(_, x)| *x % 2 == 0)
+        .map(|(i, x)| (i, *x))
         .collect();
     
     println!("中间切片: {:?}", middle_slice);

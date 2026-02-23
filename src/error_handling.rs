@@ -513,12 +513,14 @@ pub fn configuration_error_handling() {
         
         // 清理环境变量
         for (key, _) in config_test_cases.iter() {
-            std::env::remove_var(key);
+            // SAFETY: 这是在单线程测试代码中修改环境变量
+            unsafe { std::env::remove_var(key); }
         }
         
         // 设置测试环境变量
         for (key, value) in scenario {
-            std::env::set_var(key, value);
+            // SAFETY: 这是在单线程测试代码中修改环境变量
+            unsafe { std::env::set_var(key, value); }
         }
         
         match AppConfig::from_env() {
