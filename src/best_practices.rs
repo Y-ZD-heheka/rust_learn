@@ -4,7 +4,6 @@
 //! 资源管理、性能优化、代码组织等方面的实践原则和模式。
 //! 采用了现代化的Rust 2021/2024最佳实践。
 
-use std::fmt;
 use std::time::{Duration, Instant};
 use anyhow::Context;
 

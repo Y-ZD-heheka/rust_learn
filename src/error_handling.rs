@@ -900,7 +900,7 @@ pub fn external_service_error_handling() {
         }
     }
 
-    fn handle_payment_error(service_name: &str, message: &str) {
+    fn handle_payment_error(_service_name: &str, message: &str) {
         match message {
             "余额不足" => {
                 println!("🔄 提示用户充值");
