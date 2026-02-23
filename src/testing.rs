@@ -16,9 +16,35 @@ fn internal_adder(a: i32, b: i32) -> i32 {
     a + b
 }
 
-/// 现代化验证函数
+/// 现代化验证函数 - 改进的邮箱验证
 pub fn validate_email(email: &str) -> bool {
-    email.contains('@') && email.len() > 5
+    // 基本验证：必须包含 @ 和 .
+    // @ 不能在开头或结尾
+    // 必须包含至少一个 . 在 @ 之后
+    if !email.contains('@') || !email.contains('.') {
+        return false;
+    }
+    
+    let parts: Vec<&str> = email.split('@').collect();
+    if parts.len() != 2 {
+        return false;
+    }
+    
+    let local = parts[0];
+    let domain = parts[1];
+    
+    // 本地部分不能为空
+    if local.is_empty() {
+        return false;
+    }
+    
+    // 域名部分必须包含 . 且不能在开头或结尾
+    if !domain.contains('.') || domain.starts_with('.') || domain.ends_with('.') {
+        return false;
+    }
+    
+    // 总长度检查
+    email.len() >= 5
 }
 
 /// 现代化用户结构体
@@ -713,29 +739,32 @@ mod benchmark_tests {
     
     #[test]
     fn benchmark_iteration_patterns() {
-        let data: Vec<i32> = (1..100000).collect();
+        // 减小数据范围，避免 i32 溢出
+        // 使用 1..=10000 而不是 1..100000
+        // 因为 1..100000 的和是 4999950000，超过了 i32::MAX (2147483647)
+        let data: Vec<i32> = (1..=10000).collect();
         
         // for 循环
         let start = Instant::now();
-        let mut sum1 = 0;
+        let mut sum1: i64 = 0;  // 使用 i64 避免溢出
         for &item in &data {
-            sum1 += item;
+            sum1 += item as i64;
         }
         let for_loop_time = start.elapsed();
         
         // iter().sum()
         let start = Instant::now();
-        let sum2: i32 = data.iter().sum();
+        let sum2: i64 = data.iter().map(|&x| x as i64).sum();
         let sum_time = start.elapsed();
         
-        // 并行迭代
+        // 迭代器模式
         let start = Instant::now();
-        let sum3: i32 = data.iter().sum();
-        let parallel_time = start.elapsed();
+        let sum3: i64 = data.iter().fold(0i64, |acc, &x| acc + x as i64);
+        let fold_time = start.elapsed();
         
         println!("for 循环求和: {:.2}ms, 结果: {}", for_loop_time.as_millis(), sum1);
         println!("iter().sum() 求和: {:.2}ms, 结果: {}", sum_time.as_millis(), sum2);
-        println!("并行求和: {:.2}ms, 结果: {}", parallel_time.as_millis(), sum3);
+        println!("fold 求和: {:.2}ms, 结果: {}", fold_time.as_millis(), sum3);
         
         assert_eq!(sum1, sum2);
         assert_eq!(sum1, sum3);

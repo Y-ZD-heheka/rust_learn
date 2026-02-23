@@ -34,7 +34,15 @@ hex = "0.4.3"
 regex = "1.12.3"
 pbkdf2 = "0.12.2"
 
+# 项目实战依赖
+colored = "3.0.0"
+dirs = "6.0.0"
+
 [dev-dependencies]
 tempfile = "3.25.0"
 proptest = "1.10.0"
-criterion = "0.8.2"
+criterion = { version = "0.8.2", features = ["html_reports"] }
+
+[[bench]]
+name = "mod"
+harness = false

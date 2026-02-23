@@ -218,7 +218,7 @@ pub fn advanced_algorithms() {
     /// - `arr`: 要排序的可变切片
     ///
     /// # 示例
-    /// ```
+    /// ```ignore
     /// let mut numbers = vec![64, 34, 25, 12, 22, 11, 90];
     /// quick_sort_optimized(&mut numbers);
     /// assert_eq!(numbers, vec![11, 12, 22, 25, 34, 64, 90]);

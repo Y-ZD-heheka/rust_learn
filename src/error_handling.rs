@@ -21,7 +21,8 @@ pub fn modern_panic_handling() {
     println!("配置: {}", config);
     
     // 现代panic处理：debug_assert用于开发时
-    let positive_number = -5;
+    // 注意：debug_assert只在debug模式下触发，release模式下会被移除
+    let positive_number = 5; // 使用正数避免触发断言
     debug_assert!(positive_number >= 0, "数字必须为正数");
     println!("数字验证通过: {}", positive_number);
 }

@@ -18,4 +18,5 @@ pub mod advanced_patterns;
 pub mod security;
 pub mod best_practices;
 pub mod pitfalls;
+pub mod projects;
 // pub mod database; // 暂时禁用数据库模块以解决编译问题
