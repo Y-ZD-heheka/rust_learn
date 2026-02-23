@@ -570,9 +570,13 @@ pub fn complex_graph_ownership() {
     
     // 图节点结构体
     #[derive(Debug)]
+    #[allow(dead_code)]
     struct GraphNode {
+        #[allow(dead_code)]
         id: u32,
+        #[allow(dead_code)]
         value: String,
+        #[allow(dead_code)]
         neighbors: Vec<Weak<Node>>,
     }
     
@@ -587,6 +591,7 @@ pub fn complex_graph_ownership() {
             }
         }
         
+        #[allow(dead_code)]
         fn add_neighbor(&self, _neighbor: &Node) {
             // 这里需要不同的方法，因为不能修改 Rc 的内容
             println!("⚠️ 不能直接修改Rc内容，演示循环引用问题");

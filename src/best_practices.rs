@@ -4,6 +4,8 @@
 //! 资源管理、性能优化、代码组织等方面的实践原则和模式。
 //! 采用了现代化的Rust 2021/2024最佳实践。
 
+#![allow(dead_code)]
+
 use anyhow::Context;
 use std::time::{Duration, Instant};
 
@@ -198,7 +200,7 @@ pub fn resource_management_best_practices() {
         let data = shared_data.lock().unwrap();
         println!("主线程读取数据: {:?}", *data);
     }
-    
+
     // 等待子线程完成
     handle.join().unwrap();
 
