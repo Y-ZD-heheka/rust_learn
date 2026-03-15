@@ -1,8 +1,11 @@
 //! 集成测试
 //!
-//! 这个文件包含了整个rust_learn库的集成测试。
+//! 这个文件包含了整个 rust_learn 库的集成测试。
+//! 对于 [`testing`](../src/testing.rs) 与 [`error_handling`](../src/error_handling.rs) 两个已目录化主题，
+//! 这里仍然只通过公共 re-export 入口验证行为，避免让学习者误以为集成测试需要直接绑定子模块文件布局。
 
 use rust_learn::*;
+use tempfile::tempdir;
 
 // ==================== 基础模块测试 ====================
 
@@ -25,7 +28,7 @@ fn test_types_module() {
     types::run_types_examples();
 }
 
-/// 测试错误处理模块
+/// 测试错误处理模块的聚合入口在目录化后仍可统一运行
 #[test]
 fn test_error_handling_module() {
     error_handling::run_error_handling_examples();
@@ -79,7 +82,7 @@ fn test_user_creation_minor() {
 
 // ==================== 模块集成测试 ====================
 
-/// 测试测试模块的核心功能
+/// 测试 testing 主题在目录化后经聚合入口暴露的核心功能
 #[test]
 fn test_testing_module_core() {
     assert_eq!(testing::add_two(3), 5);
@@ -142,10 +145,53 @@ fn test_security_module() {
     security::run_security_examples();
 }
 
-/// 测试实战项目模块
+/// 测试实战项目中的 task manager 持久化与搜索工作流
 #[test]
-fn test_projects_module() {
-    projects::run_projects_demo();
+fn test_projects_task_manager_workflow() {
+    use rust_learn::projects::task_manager::{Priority, Status, Task, TaskManager};
+
+    let temp_dir = tempdir().expect("should create isolated temp dir");
+    let storage_path = temp_dir.path().join("integration_tasks.json");
+
+    {
+        let mut manager = TaskManager::with_storage_path(&storage_path)
+            .expect("should build task manager with injected path");
+        let todo_id = manager
+            .add_task(
+                Task::new(0, "Practice CLI coverage", Priority::High)
+                    .with_description("verify aliases and unavailable modules")
+                    .with_tags(vec!["cli".to_string(), "testing".to_string()]),
+            )
+            .expect("should persist pending task in integration workflow");
+        let done_id = manager
+            .add_task(Task::new(0, "Ship trusted tests", Priority::Urgent))
+            .expect("should persist completed task seed in integration workflow");
+
+        manager
+            .get_task_mut(done_id)
+            .expect("persisted task should exist")
+            .complete();
+        manager
+            .persist()
+            .expect("integration workflow should flush mutated task state");
+
+        let pending_tasks = manager.list_tasks(Some(Status::Pending));
+        assert_eq!(pending_tasks.len(), 1);
+        assert_eq!(pending_tasks[0].id, todo_id);
+
+        let search_results = manager.search_tasks("ALIASES");
+        assert_eq!(search_results.len(), 1);
+        assert_eq!(search_results[0].title, "Practice CLI coverage");
+    }
+
+    let reloaded_manager = TaskManager::with_storage_path(&storage_path)
+        .expect("should reload tasks from isolated storage");
+    let statistics = reloaded_manager.get_statistics();
+
+    assert_eq!(statistics.total, 2);
+    assert_eq!(statistics.completed, 1);
+    assert_eq!(statistics.pending, 1);
+    assert_eq!(statistics.urgent, 0);
 }
 
 // ==================== 端到端测试 ====================
@@ -239,7 +285,7 @@ fn test_error_propagation() {
 /// 验证文档中的示例代码能正常工作
 #[test]
 fn test_documentation_examples() {
-    // 验证testing模块的文档示例
+    // 验证 testing 主题经聚合入口暴露的文档示例
     let result = testing::greeting("World");
     assert_eq!(result, "你好，World！");
 

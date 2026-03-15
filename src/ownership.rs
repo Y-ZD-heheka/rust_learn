@@ -394,6 +394,13 @@ pub fn complex_lifetime_scenarios() {
         }
         
         fn parse_word(&mut self) -> Option<&'a str> {
+            while let Some(&ch) = self.text.as_bytes().get(self.position) {
+                if !ch.is_ascii_whitespace() {
+                    break;
+                }
+                self.position += 1;
+            }
+
             let start = self.position;
             while let Some(&ch) = self.text.as_bytes().get(self.position) {
                 if ch.is_ascii_whitespace() {
@@ -401,7 +408,7 @@ pub fn complex_lifetime_scenarios() {
                 }
                 self.position += 1;
             }
-            
+
             if start == self.position {
                 None
             } else {
@@ -713,17 +720,18 @@ pub fn advanced_borrowing_scenarios() {
 pub fn memory_management_optimization() {
     println!("⚡ 内存管理和性能优化：");
     
-    use std::mem::{size_of, align_of};
+    use std::mem::{align_of, size_of, size_of_val};
     
     // 场景1: Box vs 堆分配
     fn stack_vs_heap() {
         // 栈分配 (快速)
         let small_data = [1u8; 64];
         println!("📊 栈数据大小: {} 字节", size_of_val(&small_data));
-        
+
         // 堆分配 (较慢但适合大数据)
         let large_data = Box::new([0u8; 10000]);
-        println!("📊 堆数据大小: {} 字节", size_of_val(&large_data));
+        println!("📊 Box句柄大小: {} 字节", size_of_val(&large_data));
+        println!("📊 堆上数据大小: {} 字节", size_of_val(large_data.as_ref()));
     }
     
     stack_vs_heap();

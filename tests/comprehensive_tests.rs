@@ -1,6 +1,8 @@
 //! 全面测试套件
 //!
 //! 这个文件包含对项目所有模块的全面测试，补充单元测试的不足。
+//! 对于 [`testing`](../src/testing.rs) 与 [`error_handling`](../src/error_handling.rs) 两个已目录化主题，
+//! 这里继续通过聚合入口调用公开教学函数，避免测试说明与源码目录结构脱节。
 
 use rust_learn::*;
 
@@ -220,7 +222,7 @@ mod types_tests {
     }
 }
 
-// ==================== 错误处理详细测试 ====================
+// ==================== 错误处理详细测试（通过聚合入口 re-export） ====================
 
 mod error_handling_tests {
     use super::*;
@@ -496,7 +498,7 @@ mod pitfalls_tests {
     }
 }
 
-// ==================== 测试模块详细测试 ====================
+// ==================== 测试模块详细测试（通过聚合入口 re-export） ====================
 
 mod testing_module_tests {
     use super::*;
@@ -509,8 +511,8 @@ mod testing_module_tests {
 
     /// 测试基于属性的测试基础
     #[test]
-    fn test_property_based_testing_basics() {
-        testing::property_based_testing_basics();
+    fn test_property_thinking_basics() {
+        testing::property_thinking_basics();
     }
 
     /// 测试性能测试示例

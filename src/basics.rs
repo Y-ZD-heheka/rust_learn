@@ -3,7 +3,7 @@
 //! 这个模块演示了Rust的基础语法概念，包括变量、函数、控制流等。
 //! 采用了现代化的Rust 2021/2024最佳实践。
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::fmt;
 
 /// 演示变量声明和基本类型
@@ -157,43 +157,28 @@ pub fn modern_data_structures() {
     // 现代化字符串队列实现
     #[derive(Debug)]
     struct ModernQueue {
-        items: Vec<String>,
-        index: usize,
+        items: VecDeque<String>,
     }
 
     impl ModernQueue {
         fn new() -> Self {
             Self {
-                items: Vec::new(),
-                index: 0,
+                items: VecDeque::new(),
             }
         }
 
         fn enqueue(&mut self, item: &str) {
-            self.items.push(item.to_string());
+            self.items.push_back(item.to_string());
             println!("➕ 入队: {}", item);
         }
 
         fn dequeue(&mut self) -> Option<String> {
-            if self.index < self.items.len() {
-                let item = Some(self.items[self.index].clone());
-                self.index += 1;
-
-                // 清理已出队的元素
-                if self.index * 2 > self.items.len() {
-                    self.items = self.items[self.index..].to_vec();
-                    self.index = 0;
-                }
-
-                item
-            } else {
-                None
-            }
+            self.items.pop_front()
         }
 
         #[allow(dead_code)]
         fn is_empty(&self) -> bool {
-            self.index >= self.items.len()
+            self.items.is_empty()
         }
     }
 
@@ -505,17 +490,31 @@ pub fn file_operations() {
     println!("📁 文件操作和IO：");
 
     use std::fs;
-    // 创建测试文件
-    let test_file = "test_data.txt";
-    let content = "Hello, Rust!\n这是一个测试文件\n包含多行数据";
+    use std::time::{SystemTime, UNIX_EPOCH};
 
-    match fs::write(test_file, content) {
-        Ok(_) => println!("✅ 创建测试文件成功"),
-        Err(e) => println!("❌ 创建文件失败: {}", e),
+    let temp_dir = std::env::temp_dir();
+    let unique_suffix = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_nanos())
+        .unwrap_or_default();
+    let demo_file = temp_dir.join(format!(
+        "rust_learn_file_demo_{}_{}.txt",
+        std::process::id(),
+        unique_suffix
+    ));
+    let content = "Hello, Rust!\n这是一个临时演示文件\n演示结束后会尝试清理";
+
+    println!("🧪 使用临时文件演示，避免污染工作区: {:?}", demo_file);
+
+    match fs::write(&demo_file, content) {
+        Ok(_) => println!("✅ 创建临时演示文件成功"),
+        Err(e) => {
+            println!("❌ 创建临时文件失败: {}", e);
+            return;
+        }
     }
 
-    // 读取文件内容
-    match fs::read_to_string(test_file) {
+    match fs::read_to_string(&demo_file) {
         Ok(contents) => {
             println!("📖 文件内容:");
             for (i, line) in contents.lines().enumerate() {
@@ -525,23 +524,21 @@ pub fn file_operations() {
         Err(e) => println!("❌ 读取文件失败: {}", e),
     }
 
-    // 检查文件是否存在
-    if let Ok(metadata) = fs::metadata(test_file) {
+    if let Ok(metadata) = fs::metadata(&demo_file) {
         println!("📊 文件信息:");
+        println!("  路径: {:?}", demo_file);
         println!("  大小: {} 字节", metadata.len());
         println!("  权限: {:?}", metadata.permissions());
     }
 
-    // 清理测试文件
-    if let Err(e) = fs::remove_file(test_file) {
-        println!("⚠️ 清理文件失败: {}", e);
+    match fs::remove_file(&demo_file) {
+        Ok(_) => println!("🧹 临时演示文件已清理"),
+        Err(e) => println!("⚠️ 临时文件清理失败: {}", e),
     }
 
-    // 演示目录操作
-    if let Ok(entries) = fs::read_dir(".") {
-        println!("📂 当前目录内容:");
+    if let Ok(entries) = fs::read_dir(&temp_dir) {
+        println!("📂 临时目录示例内容（前5项）:");
         for entry in entries.take(5) {
-            // 只显示前5个
             if let Ok(entry) = entry {
                 if let Some(name) = entry.file_name().to_str() {
                     println!("  📄 {}", name);

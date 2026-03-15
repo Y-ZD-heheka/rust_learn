@@ -50,9 +50,9 @@ pub fn cryptography_hash_functions() {
 pub fn hmac_message_authentication() {
     println!("✉️ HMAC消息认证码：");
     println!("⚠️ HMAC功能由于依赖版本冲突暂时禁用");
-    println!("🔑 HMAC密钥: secret_key_2024");
-    println!("📝 消息: Important message content");
-    println!("🔐 HMAC值: 暂时无法计算");
+    println!("🔑 密钥: [示例中不输出；应由调用者安全提供]");
+    println!("📝 消息内容: [示例消息已省略]");
+    println!("🔐 HMAC值: 未计算（功能暂时禁用）");
 }
 
 /// Base64编码解码
@@ -156,9 +156,9 @@ pub fn secure_password_storage() {
     println!("🔑 安全密码存储：");
     
     println!("⚠️ PBKDF2功能由于依赖版本冲突暂时禁用");
-    println!("🔒 原始密码: my_secure_password_2024");
-    println!("🧂 盐值: unique_salt_value_12345");
-    println!("🔐 PBKDF2哈希: 暂时无法计算");
+    println!("🔒 密码输入: [示例中不回显；应由调用者提供]");
+    println!("🧂 盐值: [示例中不展示；应使用每次唯一的随机盐]");
+    println!("🔐 PBKDF2哈希: 未计算（功能暂时禁用）");
     
     // 密码验证函数
     fn verify_password(_password: &str, _salt: &str, _stored_hash: &[u8]) -> bool {
@@ -186,28 +186,29 @@ pub fn secure_random_strings() {
         }
         
         println!("⚠️ 安全随机令牌生成功能由于依赖版本冲突暂时禁用");
-        Ok("disabled_token".to_string())
+        Ok(format!("未生成（{}字节令牌占位，功能暂时禁用）", length))
     }
     
     // 生成不同长度的安全令牌
     for len in [16, 32, 64, 128] {
         match generate_secure_token(len) {
-            Ok(token) => println!("🔑 {}字节安全令牌: {}", len, token),
+            Ok(token_status) => println!("🔑 {}字节安全令牌状态: {}", len, token_status),
             Err(e) => println!("❌ 生成失败: {}", e),
         }
     }
     
     // 生成密码学随机密码
-    fn generate_secure_password(_length: usize, _include_symbols: bool) -> String {
+    fn generate_secure_password(length: usize, include_symbols: bool) -> String {
         println!("⚠️ 安全密码生成功能由于依赖版本冲突暂时禁用");
-        "disabled_password".to_string()
+        let complexity = if include_symbols { "含符号" } else { "仅字母数字" };
+        format!("未生成（{}位{}密码占位，功能暂时禁用）", length, complexity)
     }
     
     let simple_pwd = generate_secure_password(12, false);
     let complex_pwd = generate_secure_password(16, true);
     
-    println!("🔐 简单密码: {}", simple_pwd);
-    println!("🔐 复杂密码: {}", complex_pwd);
+    println!("🔐 简单密码状态: {}", simple_pwd);
+    println!("🔐 复杂密码状态: {}", complex_pwd);
 }
 
 /// 内存安全保证演示
@@ -268,12 +269,13 @@ pub fn memory_safety_guarantees() {
     println!("最终安全值: {}", *shared_data.lock().unwrap());
 }
 
-/// 常量时间比较
+/// 固定流程比较示意
 pub fn constant_time_comparison() {
-    println!("⏱️ 常量时间比较：");
+    println!("⏱️ 固定流程比较示意：");
+    println!("ℹ️ 此示例仅演示遍历全部字节的比较思路，不应视为生产级常量时间比较实现。");
     
-    // 防止时序攻击的字符串比较
-    fn constant_time_eq(a: &str, b: &str) -> bool {
+    // 教学示例：长度不同时仍会提前返回，且编译器/平台行为也可能影响真实时序。
+    fn length_checked_xor_eq_demo(a: &str, b: &str) -> bool {
         if a.len() != b.len() {
             return false;
         }
@@ -291,18 +293,18 @@ pub fn constant_time_comparison() {
     
     // 测试用例
     let test_cases = vec![
-        ("password123", "password123", true),
-        ("password123", "password456", false),
-        ("short", "much_longer_password", false),
-        ("", "", true),
-        ("test", "test", true),
+        ("相同输入", "demo-value-a", "demo-value-a", true),
+        ("不同但等长输入", "demo-value-a", "demo-value-b", false),
+        ("不同长度输入", "short", "much-longer-demo-value", false),
+        ("空字符串", "", "", true),
+        ("短字符串", "test", "test", true),
     ];
     
-    println!("🔍 时序安全比较测试:");
-    for (a, b, expected) in test_cases {
-        let result = constant_time_eq(a, b);
+    println!("🔍 比较结果测试:");
+    for (label, a, b, expected) in test_cases {
+        let result = length_checked_xor_eq_demo(a, b);
         let status = if result == expected { "✅" } else { "❌" };
-        println!("  {} '{}' vs '{}' = {} (期望: {})", status, a, b, result, expected);
+        println!("  {} {} = {} (期望: {})", status, label, result, expected);
     }
 }
 

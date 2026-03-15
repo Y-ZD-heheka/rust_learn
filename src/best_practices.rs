@@ -119,17 +119,43 @@ pub async fn async_programming_best_practices() {
         .await
     }
 
-    // 取消和超时处理
     async fn cancellable_operation() {
-        let operation = tokio::spawn(async {
-            sleep(Duration::from_secs(2)).await;
-            "长时间操作完成"
+        use tokio::sync::watch;
+
+        let (cancel_tx, mut cancel_rx) = watch::channel(false);
+        let operation = tokio::spawn(async move {
+            let mut steps_completed = 0;
+
+            loop {
+                tokio::select! {
+                    _ = cancel_rx.changed() => {
+                        if *cancel_rx.borrow() {
+                            return format!("任务在完成 {} 个步骤后收到取消信号并自行收尾", steps_completed);
+                        }
+                    }
+                    _ = sleep(Duration::from_millis(150)) => {
+                        steps_completed += 1;
+                        println!("⏳ 长时间操作执行到步骤 {}", steps_completed);
+
+                        if steps_completed == 10 {
+                            return "长时间操作自然完成".to_string();
+                        }
+                    }
+                }
+            }
         });
 
-        // 等待1秒后取消
-        sleep(Duration::from_secs(1)).await;
-        drop(operation);
-        println!("操作已被取消");
+        sleep(Duration::from_millis(350)).await;
+        println!("📨 主任务发送取消信号");
+
+        if cancel_tx.send(true).is_err() {
+            eprintln!("⚠️ 取消信号未送达：任务可能已经结束");
+        }
+
+        match operation.await {
+            Ok(message) => println!("🛑 {}", message),
+            Err(e) => eprintln!("❌ 被取消任务执行异常: {:?}", e),
+        }
     }
 
     println!("\n🚀 异步操作演示:");
@@ -436,8 +462,8 @@ pub fn testing_best_practices() {
 
         #[test]
         fn validate_email_correct_format() {
-            let email = "user@example.com";
-            assert!(email.contains('@') && email.contains('.'));
+            assert!(crate::testing::validate_email("user@example.com"));
+            assert!(!crate::testing::validate_email("user@domain"));
         }
 
         #[test]
@@ -454,14 +480,15 @@ pub fn testing_best_practices() {
         }
     }
 
-    // 2. 属性测试概念演示
+    // 2. 属性思维概念演示
     fn reverse_twice<T: Clone + PartialEq>(items: &[T]) -> bool {
         let reversed: Vec<_> = items.iter().cloned().rev().collect();
         let reversed_twice: Vec<_> = reversed.iter().cloned().rev().collect();
         items.iter().eq(reversed_twice.iter())
     }
 
-    println!("🔍 属性测试示例:");
+    println!("🔍 属性思维示例:");
+    println!("  这里使用固定样本说明不变量，不等同于真正的 property-based testing 框架。");
 
     // 测试整数列表
     let int_cases = vec![vec![1, 2, 3], vec![1], vec![]];
@@ -480,25 +507,26 @@ pub fn testing_best_practices() {
     let result = reverse_twice(&char_items);
     println!("  字符列表: {:?}", if result { "✅" } else { "❌" });
 
-    // 3. 基准测试概念
-    fn benchmark_iteration() {
+    // 3. 粗粒度耗时观察
+    fn timed_iteration_observation() {
         use std::time::Instant;
 
         let data: Vec<i32> = (1..10000).collect();
 
         let start = Instant::now();
         let sum: i32 = data.iter().sum();
-        let manual_duration = start.elapsed();
+        let sum_duration = start.elapsed();
 
         let start = Instant::now();
         let sum2: i32 = data.iter().fold(0, |acc, &x| acc + x);
         let fold_duration = start.elapsed();
 
-        println!("📊 迭代器sum: {:?}, 结果: {}", manual_duration, sum);
-        println!("📊 fold: {:?}, 结果: {}", fold_duration, sum2);
+        println!("📊 迭代器sum耗时观察: {:?}, 结果: {}", sum_duration, sum);
+        println!("📊 fold耗时观察: {:?}, 结果: {}", fold_duration, sum2);
+        println!("📌 这些数字会受到环境影响，不能替代正式 benchmark。 ");
     }
 
-    benchmark_iteration();
+    timed_iteration_observation();
 }
 
 /// 文档和注释最佳实践
@@ -592,10 +620,14 @@ pub fn run_best_practices_examples() {
     println!();
 
     println!("异步编程最佳实践:");
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
-        async_programming_best_practices().await;
-    });
+    match tokio::runtime::Runtime::new() {
+        Ok(rt) => {
+            rt.block_on(async {
+                async_programming_best_practices().await;
+            });
+        }
+        Err(e) => eprintln!("❌ 无法创建 Tokio 运行时: {}", e),
+    }
     println!();
 
     resource_management_best_practices();

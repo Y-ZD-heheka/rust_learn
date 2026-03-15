@@ -196,23 +196,19 @@ pub mod modern_exports {
 /// 现代化包和Crate概念演示
 pub fn modern_packages_and_crates() {
     println!("📦 现代化包和Crate概念：");
-    
+
     // 这个函数在rust_learn crate的modules模块中
-    println!("📚 当前在rust_learn crate的modules模块中");
-    
-    // 调用其他模块的函数 - 使用现代化路径
-    use crate::basics::run_basics_examples;
-    use crate::ownership::run_ownership_examples;
-    
-    run_basics_examples();
-    run_ownership_examples();
-    
+    println!("📚 当前在 rust_learn crate 的 modules 模块中");
+    println!("🧭 示例仅展示模块路径与导出关系，不串联执行其他主题示例");
+    println!("   - crate::basics::run_basics_examples()");
+    println!("   - crate::ownership::run_ownership_examples()");
+
     // 演示现代API使用
     let _api = modern_exports::FarmAPI::new();
     let is_healthy = modern_exports::FarmAPI::health_check();
-    
+
     println!("🔍 系统健康: {}", if is_healthy { "正常" } else { "异常" });
-    
+
     // 使用模块级常量
     println!("📊 最大作物数量: {}", modern_exports::MAX_CROPS);
     println!("🐕 最小动物年龄: {} 岁", modern_exports::MIN_ANIMAL_AGE);
@@ -620,22 +616,22 @@ pub mod microservices_internal {
 /// 演示微服务架构项目组织
 pub fn microservices_architecture() {
     println!("🏗️ 微服务架构项目组织：");
-    
+
     use microservices_internal::*;
-    
+
     // 演示微服务架构
     println!("🔧 演示微服务架构:");
-    
+
     let gateway = api_gateway::ApiGateway::new();
-    
-    // 创建用户
-    println!("✅ 创建用户演示完成");
-    
-    // 获取用户资料
-    if let Some(profile) = gateway.get_user_profile(1) {
-        println!("👤 {}", profile);
+
+    // 当前 API 网关未暴露写入流程，因此这里只演示“查询空结果”的行为
+    println!("ℹ️ 当前示例仅包含查询接口，尚未接入创建用户流程");
+
+    match gateway.get_user_profile(1) {
+        Some(profile) => println!("👤 {}", profile),
+        None => println!("👤 未找到用户 1（符合当前只读演示行为）"),
     }
-    
+
     println!("📊 微服务架构演示完成");
 }
 

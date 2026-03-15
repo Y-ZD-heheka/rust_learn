@@ -12,7 +12,7 @@ use std::fmt;
 /// 数据库连接配置
 ///
 /// 这个结构体表示数据库连接的配置信息，包括主机、端口、数据库名等。
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DatabaseConfig {
     host: String,
     port: u16,
@@ -40,8 +40,8 @@ impl Default for DatabaseConfigBuilder {
             host: "localhost".to_string(),
             port: 5432,
             database: "postgres".to_string(),
-            username: "user".to_string(),
-            password: "password".to_string(),
+            username: "<provide-username>".to_string(),
+            password: "<provide-password>".to_string(),
             pool_size: 10,
             timeout_secs: 30,
         }
@@ -105,6 +105,20 @@ impl DatabaseConfigBuilder {
             pool_size: self.pool_size,
             timeout_secs: self.timeout_secs,
         })
+    }
+}
+
+impl fmt::Debug for DatabaseConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DatabaseConfig")
+            .field("host", &self.host)
+            .field("port", &self.port)
+            .field("database", &self.database)
+            .field("username", &self.username)
+            .field("password", &"<redacted>")
+            .field("pool_size", &self.pool_size)
+            .field("timeout_secs", &self.timeout_secs)
+            .finish()
     }
 }
 
@@ -520,14 +534,17 @@ fn demo_builder() {
         .host("db.example.com")
         .port(5432)
         .database("myapp")
-        .username("admin")
-        .password("secret123")
+        .username("app_user")
+        .password("<supplied-at-runtime>")
         .pool_size(20)
         .timeout_secs(60)
         .build();
 
     match config {
-        Ok(cfg) => println!("✅ Database config created: {:?}", cfg),
+        Ok(cfg) => {
+            println!("✅ Database config created: {:?}", cfg);
+            println!("ℹ️ password 字段已脱敏；示例中的凭据应由调用者在运行时提供。")
+        }
         Err(e) => println!("❌ Error: {}", e),
     }
 }

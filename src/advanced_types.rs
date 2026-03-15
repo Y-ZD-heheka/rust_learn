@@ -43,7 +43,8 @@ impl ModernIterator for ModernCounter {
     }
     
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.max - self.current, Some(self.max))
+        let remaining = self.max.saturating_sub(self.current);
+        (remaining, Some(remaining))
     }
 }
 
@@ -52,12 +53,13 @@ pub fn modern_associated_types() {
     println!("🔄 现代化关联类型：");
     
     let mut counter = ModernCounter::new(5);
+    println!("初始大小提示（剩余元素数）: {:?}", counter.size_hint());
     while let Some(value) = counter.next() {
         println!("计数器: {}", value);
     }
     
     let hint = counter.size_hint();
-    println!("大小提示: {:?}", hint);
+    println!("遍历结束后的大小提示: {:?}", hint);
 }
 
 /// 现代化泛型类型参数
@@ -648,28 +650,33 @@ pub fn decorator_pattern() {
         }
         
         fn encrypt(&self, data: &str) -> String {
-            data.chars().map(|c| {
-                if c.is_ascii_alphanumeric() {
-                    let base = if c.is_ascii_uppercase() { b'A' } else { b'a' };
-                    let offset = (c as u8 - base) + 1;
-                    let encrypted = ((offset + 13) % 26) + base;
-                    encrypted as char
-                } else {
-                    c
-                }
-            }).collect()
+            // 这里使用 ROT13 作为“可逆变换”示例，便于演示装饰器链式处理。
+            // 它不是安全加密算法，因此仅用于教学场景。
+            data.chars()
+                .map(|c| match c {
+                    'a'..='z' => {
+                        let offset = c as u8 - b'a';
+                        ((offset + 13) % 26 + b'a') as char
+                    }
+                    'A'..='Z' => {
+                        let offset = c as u8 - b'A';
+                        ((offset + 13) % 26 + b'A') as char
+                    }
+                    _ => c,
+                })
+                .collect()
         }
         
         #[allow(dead_code)]
         fn decrypt(&self, data: &str) -> String {
-            self.encrypt(data) // ROT13是对称的
+            self.encrypt(data) // ROT13 对英文字母是对称的
         }
     }
     
     impl DataSource for EncryptionDecorator {
         fn write_data(&self, data: &str) {
             let encrypted = self.encrypt(data);
-            println!("加密数据写入");
+            println!("使用演示性的 ROT13 编码后写入（仅用于教学示例）");
             self.wrappee.write_data(&encrypted);
         }
         

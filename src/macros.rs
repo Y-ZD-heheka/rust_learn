@@ -74,18 +74,15 @@ macro_rules! math_operations {
 
 /// 现代化条件宏
 macro_rules! debug_println {
-    ($($arg:tt)*) => {
+    ($($arg:tt)*) => {{
         #[cfg(debug_assertions)]
         {
-            println!("🐛 [DEBUG] {}", format!($($arg)*));
+            println!("🐛 [DEBUG] {}", format_args!($($arg)*));
         }
-    };
-    ($($arg:tt)*) => {
         #[cfg(not(debug_assertions))]
         {
-            println!($($arg)*);
         }
-    };
+    }};
 }
 
 /// 现代化类型安全的宏
@@ -331,6 +328,19 @@ pub fn modern_repetition_patterns() {
 pub fn html_builder_dsl() {
     println!("🌐 HTML构建DSL：");
 
+    fn escape_html(raw: &str) -> String {
+        raw.chars()
+            .flat_map(|ch| match ch {
+                '&' => "&amp;".chars().collect::<Vec<_>>(),
+                '<' => "&lt;".chars().collect::<Vec<_>>(),
+                '>' => "&gt;".chars().collect::<Vec<_>>(),
+                '"' => "&quot;".chars().collect::<Vec<_>>(),
+                '\'' => "&#39;".chars().collect::<Vec<_>>(),
+                _ => vec![ch],
+            })
+            .collect()
+    }
+
     // HTML构建器结构体
     #[derive(Debug)]
     pub struct HtmlElement {
@@ -372,25 +382,23 @@ pub fn html_builder_dsl() {
         pub fn render(&self) -> String {
             let mut html = String::new();
 
-            // 生成开始标签
+            // 教学示例仅对文本节点和属性值做转义。
+            // 标签名与属性名仍视为示例作者提供的受信输入，不作为通用模板引擎承诺。
             html.push_str(&format!("<{}", self.tag));
 
-            // 生成属性
             for (name, value) in &self.attributes {
-                html.push_str(&format!(" {}=\"{}\"", name, value));
+                html.push_str(&format!(" {}=\"{}\"", name, escape_html(value)));
             }
 
             html.push('>');
 
-            // 生成内容
             for content in &self.content {
                 match content {
-                    HtmlContent::Text(text) => html.push_str(text),
+                    HtmlContent::Text(text) => html.push_str(&escape_html(text)),
                     HtmlContent::Element(element) => html.push_str(&element.render()),
                 }
             }
 
-            // 生成结束标签
             html.push_str(&format!("</{}>", self.tag));
             html
         }
@@ -428,18 +436,26 @@ pub fn html_builder_dsl() {
         .attr("class", "title")
         .attr("id", "main-title");
 
-    let paragraph = html_p!("这是一个使用Rust宏构建的HTML页面示例。").attr("class", "description");
+    let paragraph = html_p!("这是一个使用Rust宏构建的HTML页面示例。")
+        .attr("class", "description")
+        .attr("data-note", "<unsafe> \"quoted\" & raw text");
+
+    let escaped_example = html_div!("用户输入: <script>alert('xss')</script> & \"quoted\"")
+        .attr("class", "example")
+        .attr("title", "5 > 3 && 2 < 4");
 
     let header = HtmlElement::new("header").child(title);
 
-    let main = HtmlElement::new("main").child(paragraph);
+    let main = HtmlElement::new("main")
+        .child(paragraph)
+        .child(escaped_example);
 
     let page = HtmlElement::new("html")
         .attr("lang", "zh-CN")
         .child(header)
         .child(main);
 
-    println!("✅ 生成的HTML:");
+    println!("✅ 生成的HTML（文本与属性值已转义）:");
     println!("{}", page.render());
 
     println!("📊 HTML DSL演示完成");

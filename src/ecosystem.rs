@@ -1,12 +1,13 @@
-//! # 生态系统和工具模块
+//! # 生态系统与工具导览模块
 //!
-//! 这个模块演示了Rust生态系统的重要工具和概念。
-//! 采用了现代化的Rust 2021/2024生态系统最佳实践。
+//! 该文件承载的是“CLI 内可阅读的说明性导览”，而不是稳定的库级 API。
+//! 内容以打印说明、命令清单和学习建议为主，更接近随主程序展示的文档化材料。
+//!
+//! 因此它虽然仍可通过 [`rust_learn`](src/lib.rs) 访问以兼容现有调用与测试，
+//! 但在库侧仅作为弱化展示的说明性模块保留，不应被理解为与其它可验证、可复用源码等价的稳定公开能力。
 
-
-
-/// 现代化Cargo使用指南
-pub fn modern_cargo_usage() {
+/// 现代化 Cargo 使用指南。
+fn modern_cargo_usage() {
     println!("🚀 现代化Cargo使用指南：");
     
     println!("📦 Cargo是Rust的包管理器和构建工具");
@@ -38,8 +39,8 @@ pub fn modern_cargo_usage() {
     println!("  [profile.release]       - 发布配置");
 }
 
-/// 现代化crates.io生态系统
-pub fn modern_crates_io() {
+/// 现代化 crates.io 生态系统导览。
+fn modern_crates_io() {
     println!("📚 现代化crates.io生态系统：");
     
     println!("crates.io是Rust的官方包注册表，超过9000个crate");
@@ -84,8 +85,8 @@ pub fn modern_crates_io() {
     println!("  rayon - 数据并行");
 }
 
-/// 现代化开发工具链
-pub fn modern_dev_tools() {
+/// 现代化开发工具链导览。
+fn modern_dev_tools() {
     println!("🛠️ 现代化开发工具链：");
     
     // Rustup工具链管理
@@ -126,8 +127,8 @@ pub fn modern_dev_tools() {
     println!("  cargo-miri            - Miri解释器");
 }
 
-/// 现代化构建和部署
-pub fn modern_build_deployment() {
+/// 现代化构建与部署导览。
+fn modern_build_deployment() {
     println!("🏗️ 现代化构建和部署：");
     
     // CI/CD
@@ -169,8 +170,8 @@ pub fn modern_build_deployment() {
     println!("    cargo build --target wasm32-unknown-unknown --release");
 }
 
-/// 现代化专项领域应用
-pub fn modern_specialized_domains() {
+/// 现代化专项领域应用导览。
+fn modern_specialized_domains() {
     println!("🎯 现代化专项领域应用：");
     
     // 系统编程
@@ -213,8 +214,8 @@ pub fn modern_specialized_domains() {
     println!("  polkadot-sdk       - Polkadot开发");
 }
 
-/// 现代化包管理和发布
-pub fn modern_package_management() {
+/// 现代化包管理与发布导览。
+fn modern_package_management() {
     println!("📦 现代化包管理和发布：");
     
     println!("🔍 包管理最佳实践:");
@@ -248,8 +249,8 @@ pub fn modern_package_management() {
     println!("  - GitHub Pages: 示例和教程");
 }
 
-/// 现代化测试策略
-pub fn modern_testing_strategies() {
+/// 现代化测试策略导览。
+fn modern_testing_strategies() {
     println!("🧪 现代化测试策略：");
     
     println!("📋 测试类型:");
@@ -281,7 +282,9 @@ pub fn modern_testing_strategies() {
     println!("  支持HTML和Cobertura格式");
 }
 
-/// 运行现代化生态系统和工具示例
+/// 运行生态系统与工具导览。
+///
+/// 该入口目前仅作为 CLI 里的说明性模块保留，不承诺稳定库 API 语义。
 pub fn run_ecosystem_examples() {
     println!("🎯 === 现代化Rust生态系统和工具示例 ===");
     println!();

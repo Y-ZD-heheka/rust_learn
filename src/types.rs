@@ -345,28 +345,22 @@ pub fn generics() {
 
     // 泛型特征约束示例
     trait Maximum {
-        fn get_max(&self) -> &Self;
+        type Item;
+
+        fn get_max(&self) -> Option<&Self::Item>;
     }
 
-    impl<T: PartialOrd + Clone> Maximum for Vec<T> {
-        fn get_max(&self) -> &Self {
-            if self.is_empty() {
-                return self;
-            }
+    impl<T: PartialOrd> Maximum for Vec<T> {
+        type Item = T;
 
-            let mut max_index = 0;
-            for (i, item) in self.iter().enumerate() {
-                if item > &self[max_index] {
-                    max_index = i;
-                }
-            }
-
-            self // 返回整个vec而不是切片
+        fn get_max(&self) -> Option<&Self::Item> {
+            self.iter()
+                .max_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
         }
     }
 
     let numbers = vec![34, 50, 25, 100, 65];
-    if let Some(max) = numbers.get_max().first() {
+    if let Some(max) = numbers.get_max() {
         println!("最大值: {}", max);
     }
 }
@@ -460,8 +454,13 @@ pub fn associated_types() {
         type Edge;
 
         fn add_node(&mut self, node: Self::Node);
-        fn add_edge(&mut self, from: Self::Node, to: Self::Node, edge: Self::Edge);
-        fn get_neighbors(&self, node: &Self::Node) -> Vec<&Self::Node>;
+        fn add_edge(
+            &mut self,
+            from: Self::Node,
+            to: Self::Node,
+            edge: Self::Edge,
+        ) -> Result<(), String>;
+        fn get_neighbors(&self, node: &Self::Node) -> Option<Vec<&Self::Node>>;
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -484,6 +483,12 @@ pub fn associated_types() {
         edges: Vec<(usize, usize, Route)>,
     }
 
+    impl SimpleGraph {
+        fn find_city_index(&self, city: &City) -> Option<usize> {
+            self.nodes.iter().position(|node| node == city)
+        }
+    }
+
     impl Graph for SimpleGraph {
         type Node = City;
         type Edge = Route;
@@ -492,19 +497,31 @@ pub fn associated_types() {
             self.nodes.push(node);
         }
 
-        fn add_edge(&mut self, from: Self::Node, to: Self::Node, edge: Self::Edge) {
-            let from_idx = self.nodes.iter().position(|n| n == &from).unwrap();
-            let to_idx = self.nodes.iter().position(|n| n == &to).unwrap();
+        fn add_edge(
+            &mut self,
+            from: Self::Node,
+            to: Self::Node,
+            edge: Self::Edge,
+        ) -> Result<(), String> {
+            let from_idx = self
+                .find_city_index(&from)
+                .ok_or_else(|| format!("起点城市不存在: {}", from.name))?;
+            let to_idx = self
+                .find_city_index(&to)
+                .ok_or_else(|| format!("终点城市不存在: {}", to.name))?;
             self.edges.push((from_idx, to_idx, edge));
+            Ok(())
         }
 
-        fn get_neighbors(&self, node: &Self::Node) -> Vec<&Self::Node> {
-            let node_idx = self.nodes.iter().position(|n| n == node).unwrap();
-            self.edges
-                .iter()
-                .filter(|(from, _, _)| *from == node_idx)
-                .map(|(_, to_idx, _)| &self.nodes[*to_idx])
-                .collect()
+        fn get_neighbors(&self, node: &Self::Node) -> Option<Vec<&Self::Node>> {
+            let node_idx = self.find_city_index(node)?;
+            Some(
+                self.edges
+                    .iter()
+                    .filter(|(from, _, _)| *from == node_idx)
+                    .map(|(_, to_idx, _)| &self.nodes[*to_idx])
+                    .collect(),
+            )
         }
     }
 
@@ -525,6 +542,10 @@ pub fn associated_types() {
         name: "广州".to_string(),
         population: 15300000,
     };
+    let shenzhen = City {
+        name: "深圳".to_string(),
+        population: 17600000,
+    };
 
     graph.add_node(beijing.clone());
     graph.add_node(shanghai.clone());
@@ -534,10 +555,28 @@ pub fn associated_types() {
         distance: 1200.0,
         travel_time: 8.5,
     };
-    graph.add_edge(beijing.clone(), shanghai.clone(), beijing_to_shanghai);
+    match graph.add_edge(beijing.clone(), shanghai.clone(), beijing_to_shanghai) {
+        Ok(()) => println!("✅ 已添加 北京 -> 上海 路线"),
+        Err(error) => println!("❌ 添加路线失败: {}", error),
+    }
 
-    let neighbors = graph.get_neighbors(&beijing);
-    println!("北京的邻居城市: {:?}", neighbors);
+    match graph.add_edge(guangzhou.clone(), shenzhen.clone(), Route {
+        distance: 140.0,
+        travel_time: 1.5,
+    }) {
+        Ok(()) => println!("✅ 已添加 广州 -> 深圳 路线"),
+        Err(error) => println!("⚠️ 受控失败路径: {}", error),
+    }
+
+    match graph.get_neighbors(&beijing) {
+        Some(neighbors) => println!("北京的邻居城市: {:?}", neighbors),
+        None => println!("未找到城市: {}", beijing.name),
+    }
+
+    match graph.get_neighbors(&shenzhen) {
+        Some(neighbors) => println!("深圳的邻居城市: {:?}", neighbors),
+        None => println!("未找到城市: {}", shenzhen.name),
+    }
 }
 
 /// 演示NewType模式和类型安全

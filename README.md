@@ -1,508 +1,207 @@
-# Rust 学习项目 - 现代化学习指南
+# Rust 学习项目
 
-一个**全面、系统、实用**的 Rust 编程学习项目，采用 Rust 2021/2024 最佳实践，涵盖从基础语法到高级模式的完整学习路径。
+一个面向学习者的 Rust 示例仓库，当前 crate 版本为 `0.1.0`，使用 Rust 2024 Edition。项目目标不是把所有源码都包装成同一种 CLI 体验，而是提供一条从基础语法到工程实践、再到项目实战的学习路径。
 
-![Rust Version](https://img.shields.io/badge/Rust-1.70%2B-orange)
-![Edition](https://img.shields.io/badge/Edition-2021-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+当前阅读与使用时，建议始终把 [`src/main.rs`](src/main.rs) 视为 CLI 状态的唯一事实来源，把 [`docs/README.md`](docs/README.md) 视为专题文档入口，把 [`MODULE_DOCUMENTATION.md`](MODULE_DOCUMENTATION.md) 视为源码地图。
 
-## 项目特点
+## 你会学到什么
 
-- **渐进式学习路径** - 从基础概念到高级模式
-- **11,384+ 行代码示例** - 每个模块都有详细的实现
-- **现代 Rust 实践** - 采用最新的 2021/2024 特性
-- **丰富的生态库** - Tokio、Serde、Clap 等实际应用
-- **完整的测试覆盖** - 单元测试、属性测试、基准测试
-- **详细的文档注释** - 代码即文档
+- Rust 基础语法、控制流与常见算法
+- 所有权、借用、生命周期与类型系统
+- 错误处理、模块组织、宏、测试与并发
+- 高级类型设计、设计模式、生态系统与常用库
+- 工程最佳实践、安全编程、常见陷阱
+- 项目实战示例：任务管理器（带有 CLI 思维的终端案例）
+
+## 先从哪里进入
+
+如果你是第一次进入这个仓库，建议按下面顺序阅读：
+
+1. 先看 [`docs/README.md`](docs/README.md)，了解文档入口和学习顺序
+2. 再从 [`README.md`](README.md) 的学习导航矩阵选择主题
+3. 对于已接入 CLI 的主题，优先一边阅读源码、一边使用 `cargo run -- <module>` 观察输出
+4. 对于未纳入主学习 CLI 的内容，先读专题文档与源码，再决定是否深入扩展
+
+## 当前 CLI 与模块状态
+
+根据 [`src/main.rs`](src/main.rs) 当前的 [`MODULE_REGISTRY`](src/main.rs:26) 与 [`NON_CLI_MODULES`](src/main.rs:105)：
+
+- 当前已接入主学习 CLI 的主题共有 15 个：`basics`、`ownership`、`types`、`error_handling`、`concurrency`、`modules`、`macros`、`advanced_types`、`testing`、`ecosystem`、`advanced_patterns`、`popular_libraries`、`best_practices`、`security`、`pitfalls`
+- `popular_libraries` 已经是可直接运行的聚合演示入口，不再只是占位提示
+- `best_practices`、`security`、`pitfalls` 已接入 CLI，可直接通过 `cargo run -- <module>` 运行
+- `projects` 已在库入口导出，但当前不纳入主学习 CLI 注册表
+- `database` 源码文件存在，但仍未在 [`src/lib.rs`](src/lib.rs) 中启用导出，当前保持禁用
 
 ## 快速开始
 
 ### 环境要求
 
-- Rust 1.70+ ([安装 Rust](https://www.rust-lang.org/tools/install))
-- Cargo（Rust 包管理器，通常随 Rust 一起安装）
+- Rust 1.85+
+- Cargo
 
-### 安装与运行
+### 常用命令
 
 ```bash
-# 克隆项目
-git clone https://github.com/Y-ZD-heheka/rust_learn.git
-cd rust_learn
-
-# 构建项目
-cargo build
-
-# 运行所有示例
+# 运行所有已接入主学习 CLI 的模块
 cargo run
 
 # 运行特定模块
 cargo run -- basics
 cargo run -- ownership
-cargo run -- concurrency
-
-# 查看所有可用模块
-cargo run -- --help
-
-# 运行测试
-cargo test
-
-# 生成文档
-cargo doc --open
-```
-
-## 项目结构
-
-```
-src/
-  main.rs                 # 程序入口，模块选择器
-  lib.rs                  # 库根文件
-  basics.rs              # 基础语法和核心概念
-  ownership.rs           # 所有权、借用、生命周期
-  types.rs               # 类型系统、结构体、枚举
-  error_handling.rs      # 错误处理、Result 类型
-  concurrency.rs         # 并发编程、异步处理
-  modules.rs             # 模块系统、包管理
-  macros.rs              # 宏系统、元编程
-  advanced_types.rs      # 高级类型系统
-  testing.rs             # 测试策略、基准测试
-  ecosystem.rs           # 生态系统、工具链
-  advanced_patterns.rs   # 设计模式（Builder、Strategy 等）
-  popular_libraries.rs   # 常用库示例（Serde、Clap 等）
-  best_practices.rs      # 最佳实践和编码规范
-  database.rs            # 数据库集成（暂时禁用）
-  pitfalls.rs            # 常见陷阱和解决方案
-  security.rs            # 安全编程实践
-```
-
-## 模块详情
-
-### 1. 基础语法 (`basics.rs`)
-- 变量声明与绑定
-- 基本数据类型
-- 函数定义与调用
-- 控制流（if/match/loop）
-- 算法实现（快速排序、动态规划、Dijkstra）
-- **代码行数**：682 行
-
-```bash
-cargo run -- basics
-```
-
-### 2. 所有权系统 (`ownership.rs`)
-- 所有权基础
-- 借用与引用
-- 可变性规则
-- 生命周期概念
-- 内存安全保证
-- **代码行数**：800 行
-
-```bash
-cargo run -- ownership
-```
-
-### 3. 类型系统 (`types.rs`)
-- 原始类型
-- 复合类型（结构体、枚举、元组）
-- Trait 定义与实现
-- 泛型编程
-- 关联类型
-- **代码行数**：1,203 行
-
-```bash
-cargo run -- types
-```
-
-### 4. 错误处理 (`error_handling.rs`)
-- Result 类型
-- panic! 宏
-- 自定义错误类型
-- 错误恢复策略
-- 最佳实践
-- **代码行数**：999 行
-
-```bash
-cargo run -- error_handling
-```
-
-### 5. 并发编程 (`concurrency.rs`)
-- 线程基础
-- 消息传递
-- 共享状态（Arc、Mutex）
-- Async/await（Tokio）
-- 异步流处理
-- **代码行数**：452 行
-
-```bash
-cargo run -- concurrency
-```
-
-### 6. 模块系统 (`modules.rs`)
-- 模块定义与组织
-- 包和 crate 管理
-- 可见性与私有性
-- 模块最佳实践
-- **代码行数**：738 行
-
-```bash
 cargo run -- modules
-```
-
-### 7. 宏系统 (`macros.rs`)
-- 声明式宏
-- 宏规则与模式匹配
-- 递归宏
-- DSL 构建
-- **代码行数**：951 行
-
-```bash
-cargo run -- macros
-```
-
-### 8. 高级类型 (`advanced_types.rs`)
-- 类型级编程
-- 幻影类型
-- 类型状态
-- Newtype 模式
-- 类型设计模式
-- **代码行数**：991 行
-
-```bash
 cargo run -- advanced_types
-```
-
-### 9. 设计模式 (`advanced_patterns.rs`)
-- **Builder 模式** - 灵活的对象构建
-- **Strategy 模式** - 算法族选择
-- **Observer 模式** - 事件与通知
-- **State 模式** - 状态机实现
-- **Factory 模式** - 对象创建
-- **Decorator 模式** - 函数组合
-- **代码行数**：650 行
-
-```bash
-cargo run -- advanced_patterns
-```
-
-### 10. 测试 (`testing.rs`)
-- 单元测试
-- 集成测试
-- 属性测试
-- 基准测试
-- 测试组织
-- **代码行数**：1,158 行
-
-```bash
-cargo run -- testing
-cargo test
-```
-
-### 11. 生态系统 (`ecosystem.rs`)
-- Cargo 工具链
-- crates.io 生态系统
-- 推荐库
-- 开发工具
-- 最佳实践
-- **代码行数**：315 行
-
-```bash
-cargo run -- ecosystem
-```
-
-### 12. 常用库 (`popular_libraries.rs`)
-- **Serde** - 序列化/反序列化
-- **Clap** - 命令行参数解析
-- **Reqwest** - HTTP 客户端
-- **Anyhow** - 错误处理
-- **Thiserror** - 自定义错误
-- **Tracing** - 日志与追踪
-- **Chrono** - 日期/时间处理
-- **UUID** - 标识符生成
-- **代码行数**：526 行
-
-```bash
 cargo run -- popular_libraries
-```
-
-### 13. 最佳实践 (`best_practices.rs`) - 新增
-- 代码组织与结构
-- 命名规范
-- 文档标准
-- 性能优化技巧
-- 惯用 Rust 模式
-- 代码审查指南
-- **代码行数**：605 行
-
-```bash
-cargo run -- best_practices
-```
-
-### 14. 数据库集成 (`database.rs`) - 新增
-- SQLx 使用示例
-- Diesel ORM 示例
-- 连接池
-- 事务处理
-- 迁移管理
-- **代码行数**：489 行（暂时禁用）
-
-```bash
-# 注意：此模块暂时禁用
-# cargo run -- database
-```
-
-### 15. 常见陷阱 (`pitfalls.rs`) - 新增
-- 所有权陷阱
-- 借用检查器问题
-- 性能反模式
-- 并发错误
-- 内存泄漏模式
-- 解决方案与变通方法
-- **代码行数**：484 行
-
-```bash
-cargo run -- pitfalls
-```
-
-### 16. 安全编程 (`security.rs`) - 新增
-- 输入验证
-- 安全错误处理
-- 加密操作
-- 内存安全注意事项
-- 安全最佳实践
-- 常见漏洞
-- **代码行数**：341 行
-
-```bash
 cargo run -- security
-```
 
-## 学习路径建议
-
-### 初级阶段（模块 1-4）
-如果你是 Rust 新手，按以下顺序学习：
-1. `basics.rs` - 了解基础语法和变量
-2. `ownership.rs` - 掌握所有权（Rust 核心概念）
-3. `types.rs` - 学习类型系统
-4. `error_handling.rs` - 理解错误处理
-
-**预计时间**：2-3 周
-
-### 中级阶段（模块 5-9）
-打好基础后，继续学习：
-5. `concurrency.rs` - 并发编程
-6. `modules.rs` - 代码组织
-7. `macros.rs` - 元编程
-8. `testing.rs` - 测试策略
-9. `advanced_patterns.rs` - 设计模式
-
-**预计时间**：3-4 周
-
-### 高级阶段（模块 10-16）
-提升实战能力：
-10. `popular_libraries.rs` - 生态库应用
-11. `ecosystem.rs` - 工具链掌握
-12. `advanced_types.rs` - 深入类型系统
-13. `best_practices.rs` - 最佳实践与规范
-14. `security.rs` - 安全编程
-15. `pitfalls.rs` - 常见陷阱与解决方案
-16. `database.rs` - 数据库集成
-
-**预计时间**：2-3 周
-
-## 依赖项
-
-```toml
-# 异步运行时
-tokio = "1.48.0"
-futures = "0.3.30"
-
-# 数据处理
-serde = "1.0.228"
-serde_json = "1.0.145"
-
-# CLI
-clap = "4.5.51"
-
-# HTTP 客户端
-reqwest = "0.12.24"
-
-# 错误处理
-anyhow = "1.0.100"
-thiserror = "2.0.17"
-
-# 日志与追踪
-tracing = "0.1.41"
-tracing-subscriber = "0.3.20"
-
-# 日期/时间
-chrono = "0.4.42"
-
-# 标识符
-uuid = "1.18.1"
-```
-
-## 使用示例
-
-### 运行特定模块
-
-```bash
-# 查看帮助
+# 查看 CLI 帮助
 cargo run -- --help
 
-# 运行 basics 模块
-cargo run -- basics
-
-# 运行 ownership 模块
-cargo run -- ownership
-
-# 运行所有示例（默认）
-cargo run
-```
-
-### 运行测试
-
-```bash
-# 运行所有测试
-cargo test
-
-# 运行特定测试
-cargo test test_add_two
-
-# 运行测试并显示输出
-cargo test -- --nocapture
-
-# 单线程测试执行
-cargo test -- --test-threads=1
-```
-
-### 生成文档
-
-```bash
-# 生成文档并在浏览器中打开
+# 生成项目文档
 cargo doc --open
-
-# 生成包含私有项的文档
-cargo doc --document-private-items --open
 ```
 
-### 性能分析
+> 说明：本仓库中并不是每个源码主题都在当前 CLI 中暴露为独立命令。请优先参考 [`docs/README.md`](docs/README.md) 中的文档索引和状态说明。
 
-```bash
-# 编译优化版本（release 模式）
-cargo build --release
+## 学习导航矩阵
 
-# 运行 release 版本
-cargo run --release -- basics
+下表用于回答 6 个问题：学什么、先学什么、需要什么前置知识、源码入口在哪里、有没有专题文档、能不能直接从 CLI 运行。
 
-# 基准测试
-cargo test --release -- --nocapture benchmark
+| 主题 | 推荐顺序 | 前置知识 | 源码入口 | 文档页 | CLI 可运行状态 |
+|------|----------|----------|----------|--------|----------------|
+| 基础语法 | 1 | 无 | `src/basics.rs` | `docs/basics.md` | 已接入 |
+| 所有权 | 2 | 基础语法 | `src/ownership.rs` | 暂无独立专题页 | 已接入 |
+| 类型系统 | 3 | 基础语法、所有权 | `src/types.rs` | `docs/types.md` | 已接入 |
+| 错误处理 | 4 | 类型系统、Result 基础 | `src/error_handling.rs`（聚合入口） + `src/error_handling/`（教学分层） | `docs/error_handling.md` | 已接入 |
+| 模块系统 | 5 | 基础语法、类型系统 | `src/modules.rs` | `docs/modules.md` | 已接入 |
+| 并发编程 | 6 | 所有权、错误处理 | `src/concurrency.rs` | `docs/concurrency.md` | 已接入 |
+| 宏系统 | 7 | 模块系统、模式匹配 | `src/macros.rs` | `docs/macros.md` | 已接入 |
+| 测试 | 8 | 错误处理、模块组织 | `src/testing.rs`（聚合入口） + `src/testing/`（教学分层） | `docs/testing.md` | 已接入 |
+| 高级类型 | 9 | 所有权、类型系统、trait | `src/advanced_types.rs` | `docs/advanced_types.md` | 已接入 |
+| 设计模式 | 10 | 模块系统、trait、泛型 | `src/advanced_patterns.rs` | `docs/advanced_patterns.md` | 已接入 |
+| 生态系统 | 11 | Cargo 基础、测试基础 | `src/ecosystem.rs` | `docs/ecosystem.md` | 已接入 |
+| 常用库实践 | 12 | 生态系统、错误处理 | `src/popular_libraries.rs` | `docs/popular_libraries.md` | 已接入 |
+| 最佳实践 | 13 | 主学习路径前 12 项 | `src/best_practices.rs` | 暂无独立专题页 | 已接入 |
+| 安全编程 | 14 | 错误处理、常用库基础 | `src/security.rs` | `docs/security.md` | 已接入 |
+| 常见陷阱 | 15 | 所有权、并发、类型系统 | `src/pitfalls.rs` | 暂无独立专题页 | 已接入 |
+| 项目实战：任务管理器 | 16 | 主学习路径前 12 项 | `src/projects/task_manager/mod.rs` + `src/projects/task_manager/` | `docs/projects_task_manager.md` | 项目实战示例，不纳入主学习 CLI |
+| 数据库专题 | 可选 | 生态系统、错误处理、异步基础 | `src/database.rs` | 暂无独立专题页 | 当前禁用 |
+
+## 推荐学习路线
+
+### 阶段一：建立 Rust 基础心智
+
+1. `basics`
+2. `ownership`
+3. `types`
+4. `error_handling`
+
+这四个主题决定了你后面读模块、并发和高级类型时是否轻松。
+
+### 阶段二：建立工程化理解
+
+5. `modules`
+6. `concurrency`
+7. `macros`
+8. `testing`
+
+这一阶段重点不是记住所有 API，而是理解 Rust 项目如何组织、如何验证、如何扩展。
+
+### 阶段三：进入高阶语言与生态主题
+
+9. `advanced_types`
+10. `advanced_patterns`
+11. `ecosystem`
+12. `popular_libraries`
+
+这一阶段建议把“源码结构”和“CLI 输出”配合起来看，理解抽象设计和真实工程工具链如何配合。
+
+### 阶段四：补齐工程专题与实战视角
+
+13. `best_practices`
+14. `security`
+15. `pitfalls`
+16. `projects/task_manager`
+
+这些内容更适合在已经能读懂前面模块后再进入，否则容易只记结论、看不懂原因。
+
+## 文档入口
+
+### 文档总索引
+
+- [`docs/README.md`](docs/README.md)：文档导航入口与完整学习矩阵
+- [`MODULE_DOCUMENTATION.md`](MODULE_DOCUMENTATION.md)：源码主题总览与状态对照
+- [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md)：仓库结构与入口关系
+- [`IMPROVEMENTS.md`](IMPROVEMENTS.md)：本轮改进与后续待办记录
+
+### 当前已提供的专题文档
+
+- `docs/basics.md`
+- `docs/error_handling.md`
+- `docs/testing.md`
+- `docs/security.md`
+- `docs/types.md`
+- `docs/concurrency.md`
+- `docs/macros.md`
+- `docs/advanced_patterns.md`
+- `docs/modules.md`
+- `docs/advanced_types.md`
+- `docs/ecosystem.md`
+- `docs/popular_libraries.md`
+- `docs/projects_task_manager.md`
+
+## 项目结构速览
+
+```text
+src/
+├── main.rs                    # 主学习 CLI 入口与模块注册表
+├── lib.rs                     # 库导出入口，database 当前仍注释禁用
+├── basics.rs                  # 基础语法
+├── ownership.rs               # 所有权与生命周期
+├── types.rs                   # 类型系统
+├── error_handling.rs          # 错误处理聚合入口
+├── error_handling/
+│   ├── fundamentals.rs        # panic / Result / ? 基础
+│   ├── io_config.rs           # 文件 IO 与配置错误
+│   ├── domain.rs              # 业务校验、恢复与日志
+│   └── infrastructure.rs      # 资源加载与外部服务错误
+├── modules.rs                 # 模块系统
+├── concurrency.rs             # 并发与异步
+├── macros.rs                  # 宏系统
+├── testing.rs                 # 测试主题聚合入口
+├── testing/
+│   ├── domain.rs              # 被测对象与基础断言
+│   ├── documentation.rs       # 文档测试与基础演示
+│   ├── strategies.rs          # 属性测试、TDD、边界测试
+│   └── performance.rs         # 性能测试与集成场景
+├── advanced_types.rs          # 高级类型
+├── advanced_patterns.rs       # 设计模式
+├── ecosystem.rs               # 生态系统与工具链
+├── popular_libraries.rs       # 常用库聚合演示
+├── best_practices.rs          # 最佳实践
+├── security.rs                # 安全编程
+├── pitfalls.rs                # 常见陷阱
+├── projects/
+│   └── task_manager/          # 任务管理器项目实战示例（多文件拆分）
+└── database.rs                # 数据库专题，当前禁用
 ```
 
-## 测试覆盖
+## 关于 `projects` 与 `database`
 
-本项目包含全面的测试：
+### 为什么 `projects` 不在主学习 CLI 中
 
-```bash
-# 单元测试
-cargo test test_
+[`src/projects/mod.rs`](src/projects/mod.rs) 与 [`src/projects/task_manager/mod.rs`](src/projects/task_manager/mod.rs) 更像项目实战材料，而不是单一知识点示例。它适合在学习者完成主学习路径后，再从结构设计、状态建模、持久化语义和终端交互体验角度回看，而不是把它理解为已并入主学习路径的完整 CLI 工具。
 
-# 集成测试
-cargo test --test integration_test
+### 为什么 `database` 当前不纳入主学习路径
 
-# 所有测试
-cargo test --all
-```
+[`src/database.rs`](src/database.rs) 的主题依赖数据库环境、额外依赖配置与更稳定的启用策略，而 [`src/lib.rs`](src/lib.rs) 当前仍将它保持为注释禁用状态。为了不让初学者在主路径中提前陷入环境配置问题，当前文档把它明确标记为“可选且禁用”。
 
-**测试统计**：
-- 单元测试：80+ 个
-- 属性测试：15+ 个
-- 集成测试：8+ 个
-- 基准测试：10+ 个
+## 学习建议
 
-## 推荐资源
-
-### 官方资源
-- [The Rust Book](https://doc.rust-lang.org/book/) - Rust 官方书籍
-- [Rust By Example](https://doc.rust-lang.org/rust-by-example/) - 示例集合
-- [Rust Reference](https://doc.rust-lang.org/reference/) - 语言参考
-
-### 学习资源
-- [course](https://course.rs/) - 墙裂推荐的中文学习教程
-- [Rustlings](https://github.com/rust-lang/rustlings) - 交互式教程
-- [Exercism Rust Track](https://exercism.org/tracks/rust) - 编程练习
-- [Rust Design Patterns](https://rust-lang.github.io/api-guidelines/) - 设计指南
-
-### 社区
-- [The Rust Community](https://www.rust-lang.org/community/)
-- [r/rust](https://www.reddit.com/r/rust/) - Rust 社区
-- [Rust Forum](https://users.rust-lang.org/) - 官方论坛
-
-## 贡献指南
-
-欢迎贡献！如果你有改进建议：
-
-1. Fork 本项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 提交 Pull Request
-
-## 项目改进计划
-
-### 已完成
-- [x] 基础语法和核心概念模块
-- [x] 所有权和生命周期系统
-- [x] 类型系统和 trait
-- [x] 错误处理模式
-- [x] 并发编程
-- [x] 模块系统
-- [x] 宏系统和元编程
-- [x] 高级类型系统
-- [x] 设计模式（Builder、Strategy、Observer 等）
-- [x] 测试策略
-- [x] 生态系统工具
-- [x] 常用库示例
-- [x] 最佳实践模块
-- [x] 常见陷阱模块
-- [x] 安全编程模块
-
-### 计划中
-- [ ] 启用数据库模块（SQLx、Diesel）
-- [ ] 添加更多设计模式示例
-- [ ] Web 框架集成（Axum、Actix）
-- [ ] 性能优化深入探讨
-- [ ] 编译器优化技术
-- [ ] FFI（外部函数接口）示例
-
-## 许可证
-
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
-
-## 作者
-
-**Y-ZD-heheka**
-
-- GitHub: [@Y-ZD-heheka](https://github.com/Y-ZD-heheka)
-- 项目链接: [rust_learn](https://github.com/Y-ZD-heheka/rust_learn)
-
-## 如果这个项目对你有帮助，请给个 Star！
-
-## 常见问题（FAQ）
-
-### Q: 我应该从哪个模块开始？
-A: 如果你是完全的新手，从 `basics.rs` 开始，然后按照学习路径建议进行学习。
-
-### Q: 代码可以用于生产环境吗？
-A: 本项目主要用于教育目的。代码质量较高，但在生产环境使用前应进行充分测试。
-
-### Q: 如何跳过某些模块？
-A: 可以通过 `cargo run -- <模块名>` 运行特定模块，或编辑 `main.rs` 中的 MODULE_REGISTRY。
-
-### Q: 项目多久更新一次？
-A: 项目会定期维护和改进，跟随 Rust 的发展而更新。
-
-### Q: 我可以将此项目用于商业目的吗？
-A: 可以！MIT 许可证允许商业使用，但需要包含许可证文本。
+- 先用 [`docs/README.md`](docs/README.md) 选主题，再看对应源码文件
+- 对已接入 CLI 的主题，优先使用 `cargo run -- <module>` 验证理解
+- 对没有独立专题页的主题，先参考 [`MODULE_DOCUMENTATION.md`](MODULE_DOCUMENTATION.md) 的模块说明，再回到源码
+- 对项目实战内容，先读 [`docs/projects_task_manager.md`](docs/projects_task_manager.md)，再从 [`src/projects/task_manager/mod.rs`](src/projects/task_manager/mod.rs) 跳转到各职责文件阅读
 
 ---
 
-**学习愉快！**
+愿这份仓库既能作为 Rust 入门地图，也能作为后续工程化学习的索引。
